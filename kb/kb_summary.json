@@ -1,9 +1,19 @@
 {
-  "research_areas": [],
+  "research_areas": [
+    "depth estimation"
+  ],
   "top_keywords": [
     [
       "3D Gaussian Splatting",
       3
+    ],
+    [
+      "SLAM",
+      3
+    ],
+    [
+      "MVS",
+      2
     ],
     [
       "온라인 멀티뷰 스테레오",
@@ -26,23 +36,15 @@
       1
     ],
     [
-      "뷰 선택",
+      "3DGS",
       1
     ],
     [
-      "모델 완전성",
+      "Gaussian Splatting",
       1
     ],
     [
-      "온라인 3D 모델링",
-      1
-    ],
-    [
-      "복셀 기반 렌더링",
-      1
-    ],
-    [
-      "SLAM",
+      "Depth Estimation",
       1
     ],
     [
@@ -58,23 +60,23 @@
       1
     ],
     [
+      "DFM",
+      1
+    ],
+    [
+      "양방향 융합",
+      1
+    ],
+    [
+      "3D 재구성",
+      1
+    ],
+    [
       "Multi-View Stereo",
       1
     ],
     [
-      "Depth Foundation Models",
-      1
-    ],
-    [
-      "3D Reconstruction",
-      1
-    ],
-    [
-      "Bidirectional Refinement",
-      1
-    ],
-    [
-      "Cost Volume Refinement",
+      "사각 복원",
       1
     ]
   ],
@@ -83,42 +85,49 @@
       "title": "M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo",
       "venue": "CVPR",
       "year": 2026,
-      "contribution": "새로운 MVS 프레임워크를 도입하여 복잡한 상황에서도 깨끗하고 완전한 깊이 맵을 생성.",
+      "contribution": "DFM과 MVS를 통합하여 3D 재구성을 보장하는 새로운 MVS 프레임워크 제안",
       "importance": 0.6
+    },
+    {
+      "title": "Online 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
+      "venue": "IEEE Access",
+      "year": 2024,
+      "contribution": "온라인 MVS와 3DGS를 결합한 새로운 파이프라인 제안",
+      "importance": 0.44999999999999996
     },
     {
       "title": "MVS-GS: High-Quality 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
       "venue": "",
       "year": 2025,
-      "contribution": "고품질 3DGS 매핑 프레임워크 제안",
+      "contribution": "고품질 3DGS 매핑을 위한 새로운 프레임워크 제안",
       "importance": 0.359
     },
     {
       "title": "Stereo-GS: Online 3D Gaussian Splatting Mapping Using Stereo Depth Estimation",
       "venue": "",
       "year": 2025,
-      "contribution": "스테레오 깊이 추정을 기반으로 한 3DGS 재구성 프레임워크 제안",
+      "contribution": "스테레오 깊이 추정을 통한 온라인 3DGS 재구성 프레임워크 제안",
       "importance": 0.35
     },
     {
       "title": "Online 3D Gaussian Splatting Modeling with Novel View Selection",
       "venue": "",
       "year": 2025,
-      "contribution": "적응적 뷰 선택을 통한 모델의 완전성 향상",
+      "contribution": "대학교 3DGS 모델링을 위한 새로운 뷰 선택 접근법 제안",
       "importance": 0.253
     }
   ],
-  "researcher_profile": "이 연구자는 컴퓨터 비전 및 3D 모델링 분야에서 주로 활동하며, 특별히 3D Gaussian Splatting과 온라인 멀티뷰 스테레오 기술을 집중적으로 연구하고 있습니다. 이들의 주요 연구 관심사는 신경 렌더링, 깊이 추정 및 복셀 기반 렌더링을 포함하며, 모델 완전성과 뷰 선택을 고려한 온라인 3D 모델링 기술을 발전시키고 있습니다. 대표 논문으로는 \"M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo\"가 있으며, 온라인 환경에서 고품질의 3D 모델링 솔루션을 제시하고자 다수의 논문을 발표하고 있습니다.",
+  "researcher_profile": "이 연구자는 깊이 추정을 중심으로 다양한 3D 모델링 기법을 연구하고 있으며, 특히 3D Gaussian Splatting을 활용한 혁신적인 방법론을 개발하고 있습니다. 주요 연구 분야는 SLAM, MVS, 그리고 신경 렌더링을 포함하며, 온라인 멀티뷰 스테레오를 통해 실시간 3D 모델링을 구현하는 데 주력하고 있습니다. 이 연구자의 대표적인 논문인 \"M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo\"는 2026년 CVPR에 게재되었으며, 3DGS를 활용한 여러 논문은 IEEE Access와 다양한 학술지에 발표되었습니다. 연구는 고품질의 깊이 추정과 3D 매핑을 위한 혁신적 솔루션을 제공하는 데 중점을 두고 있습니다.",
   "technical_expertise": [
+    "DROID-SLAM",
     "NeRF",
     "3DGS",
-    "멀티레이어 퍼셉트론",
-    "Differentiable Volumetric Rendering",
+    "MVS",
+    "지속적인 깊이 추정",
+    "병렬 백엔드 모듈",
     "SLAM",
-    "MVS 네트워크",
-    "Gaussian primitives",
-    "불확실성 분석",
-    "전역 번들 어드저스트먼트",
-    "Neural Radiance Fields"
+    "Neural Rendering",
+    "Multi-View Stereo",
+    "Differentiable Rendering"
   ]
 }

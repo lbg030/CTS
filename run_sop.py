@@ -523,6 +523,7 @@ def build_prompts(company_name: str, workflow_guide: str) -> Dict[str, str]:
         "출력은 JSON 하나만. 키/문자열은 큰따옴표.\n"
         "문자열 내부 줄바꿈은 \\n로 escape하고 실제 줄바꿈을 쓰지 마라.\n"
         "근거(evidence, company_profile)에 없는 사실/수치/논문명은 만들지 마라.\n"
+        "합격 자소서 흐름 가이드는 구조 참고용이다. 문장/사례/수치/고유명사는 절대 재사용하지 마라.\n"
         "긴 CoT 출력 금지. reasoning_summary는 2줄 이내.\n"
         f"가이드라인:\n{guide}\n"
     )
@@ -727,6 +728,10 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
             if os.path.exists(flow_guide_path):
                 flow_guide = read_text(flow_guide_path)
                 workflow_guide += "\n\n[합격 자소서 흐름 가이드]\n" + flow_guide
+            patterns_md_path = ps_cfg.get("output", {}).get("patterns_md", "patterns/pass_sop_patterns.md")
+            if os.path.exists(patterns_md_path):
+                patterns_md = read_text(patterns_md_path)
+                workflow_guide += "\n\n[합격 자소서 구조 패턴 요약]\n" + patterns_md
 
     # 회사 프로필
     company_slug = cfg.get("company_profile", {}).get("company_slug") or slugify(company_name)

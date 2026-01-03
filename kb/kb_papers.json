@@ -22,12 +22,12 @@
       "깊이 추정"
     ],
     "key_contributions": [
-      "고품질 3DGS 매핑 프레임워크 제안",
-      "온라인 MVS 기법에 의한 포괄적인 깊이 필터링 통합"
+      "고품질 3DGS 매핑을 위한 새로운 프레임워크 제안",
+      "온라인 MVS를 통한 정밀한 깊이 필터링 과정 도입"
     ],
-    "problem_addressed": "네트워크 렌더링을 위한 정확한 온라인 3D 모델 생성 도전 해결",
-    "proposed_method": "온라인 MVS 접근 방식을 사용한 고품질 3DGS 모델링 프레임워크",
-    "results_summary": "실내 PSNR 2 dB 개선, 실외 및 대규모 공중 장면 PSNR 10.28 dB 향상"
+    "problem_addressed": "RGB 이미지에서 실시간으로 3D 모델을 생성하는 어려움",
+    "proposed_method": "온라인 MVS를 사용하여 고품질의 3DGS 모델을 생성",
+    "results_summary": "실내 장면에서 PSNR 평균 약 2 dB 개선, 대규모 항공 장면에서 10.28 dB 개선"
   },
   {
     "paper_id": "9eac4875c0cd",
@@ -43,19 +43,19 @@
     "citations": 1,
     "importance_score": 0.253,
     "keywords": [
-      "3D Gaussian Splatting",
-      "뷰 선택",
-      "모델 완전성",
-      "온라인 3D 모델링",
-      "복셀 기반 렌더링"
+      "3DGS",
+      "SLAM",
+      "Gaussian Splatting",
+      "MVS",
+      "Depth Estimation"
     ],
     "key_contributions": [
-      "적응적 뷰 선택을 통한 모델의 완전성 향상",
-      "상태 최적의 MVS 네트워크 통합 및 온라인 3DGS 프레임워크 제안"
+      "대학교 3DGS 모델링을 위한 새로운 뷰 선택 접근법 제안",
+      "불확실성 정의를 통한 효과적인 비키프레임 선택"
     ],
-    "problem_addressed": "키프레임에만 의존하여 3D 모델의 불완전한 재구성과 범용성 부족",
-    "proposed_method": "비키프레임을 효과적으로 활용하여 3DGS 모델의 완전성을 개선하는 적응적 뷰 선택 방법 제안",
-    "results_summary": "제안된 방법은 두 개의 벤치마크를 활용한 실험에서 기존 방법을 능가하는 성능을 보이며, 특히 복잡한 야외 장면에서도 탁월한 성능을 입증했습니다."
+    "problem_addressed": "기존 3DGS 모델링의 불완전함을 극복",
+    "proposed_method": "적응형 뷰 선택과 비키프레임 활용을 통한 3DGS 모델링 개선",
+    "results_summary": "제안된 방법론이 기존 최신 방법들보다 높은 성능을 보여줌"
   },
   {
     "paper_id": "ebd43503423c",
@@ -78,12 +78,12 @@
       "neural rendering"
     ],
     "key_contributions": [
-      "스테레오 깊이 추정을 기반으로 한 3DGS 재구성 프레임워크 제안",
-      "견고한 스테레오 기반 깊이 추정 파이프라인 도입"
+      "스테레오 깊이 추정을 통한 온라인 3DGS 재구성 프레임워크 제안",
+      "튼튼한 스테레오 기반 깊이 추정 파이프라인 도입"
     ],
-    "problem_addressed": "기존 3DGS 방법의 온라인 SLAM 시나리오에서의 제약",
-    "proposed_method": "스테레오 깊이 추정을 기반으로 한 3DGS 재구성 프레임워크",
-    "results_summary": "Stereo-GS는 EuRoC에서 평균 PSNR 23.70, TartanAir에서 22.47을 기록하며 기존 방법보다 뛰어난 성능을 입증했습니다."
+    "problem_addressed": "기존 3DGS 방법의 온라인 SLAM에의 부적합성 해결",
+    "proposed_method": "실시간 스테레오 이미지 스트림을 사용하는 3D Gaussian Splatting 프레임워크 개발",
+    "results_summary": "EuRoC에서 평균 PSNR 23.70, TartanAir에서 22.47을 기록하며 뛰어난 성능을 입증"
   },
   {
     "paper_id": "07af93b9bae7",
@@ -96,19 +96,41 @@
     "citations": 0,
     "importance_score": 0.6,
     "keywords": [
-      "Multi-View Stereo",
-      "Depth Foundation Models",
-      "3D Reconstruction",
-      "Bidirectional Refinement",
-      "Cost Volume Refinement"
+      "MVS",
+      "DFM",
+      "양방향 융합",
+      "3D 재구성"
     ],
     "key_contributions": [
-      "새로운 MVS 프레임워크를 도입하여 복잡한 상황에서도 깨끗하고 완전한 깊이 맵을 생성.",
-      "양방향의 상호 정제 메커니즘을 제안하여 MVS와 단일 사진의 강점을 동시에 활용.",
-      "단일 사진과 MVS 정보를 융합하여 지역적인 기하학적 일관성을 강화하는 비용 볼륨 정제 전략을 제안."
+      "DFM과 MVS를 통합하여 3D 재구성을 보장하는 새로운 MVS 프레임워크 제안",
+      "MVS 깊이를 사용하여 단안의 규모 일관성을 맞추는 양방향 상호 개선 메커니즘 제안"
     ],
-    "problem_addressed": "기존 MVS과 단일 사진 기반 방법론의 한계 극복",
-    "proposed_method": "깊이 기초 모델과 MVS를 양방향으로 통합",
-    "results_summary": "다양한 벤치마크에서 기존 MVS 방법을 능가하며 고도의 정확성과 일반화를 달성."
+    "problem_addressed": "시야 겹침이 적거나 복잡한 기하학적 구조에서 MVS의 일반화 어려움",
+    "proposed_method": "DFM과 MVS 깊이를 양방향으로 통합하여 깊이 추정 정확도 향상",
+    "results_summary": "다양한 벤치마크에서 최첨단 MVS 방법을 능가하며, 코드가 공개됨"
+  },
+  {
+    "paper_id": "4df008a0b04d",
+    "title": "Online 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
+    "authors": [
+      "이병권"
+    ],
+    "year": 2024,
+    "venue": "IEEE Access",
+    "citations": 0,
+    "importance_score": 0.44999999999999996,
+    "keywords": [
+      "3D Gaussian Splatting",
+      "Multi-View Stereo",
+      "SLAM",
+      "사각 복원"
+    ],
+    "key_contributions": [
+      "온라인 MVS와 3DGS를 결합한 새로운 파이프라인 제안",
+      "Uncertainty-aware NVS를 통한 향상된 3D Scene 완성도"
+    ],
+    "problem_addressed": "기존 3D 복원 방법의 기하학적 붕괴 문제 해결",
+    "proposed_method": "온라인 MVS를 활용한 강건한 3D Gaussian Splatting 매핑",
+    "results_summary": "PSNR 11.6% 향상, 실시간성 확보 및 대규모 실외 환경에서도 높은 재구성 품질"
   }
 ]

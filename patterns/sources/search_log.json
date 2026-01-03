@@ -1,0 +1,58 @@
+{
+  "company": "NAVER LABS",
+  "role": "Generative Computer Vision Researcher",
+  "questions": [
+    "[필수] 자신에 대해 자유롭게 표현해주세요."
+  ],
+  "question_categories": [
+    "자기소개"
+  ],
+  "role_terms": [
+    "컴퓨터 비전",
+    "비전",
+    "영상",
+    "생성",
+    "생성형",
+    "연구원"
+  ],
+  "company_terms": [
+    "네이버랩스",
+    "네이버 랩스",
+    "네이버",
+    "NAVER LABS"
+  ],
+  "steps": [
+    {
+      "step": "A",
+      "name": "질문+회사+직무",
+      "queries": [
+        "네이버랩스 컴퓨터 비전 자기소개 합격 자소서",
+        "네이버랩스 컴퓨터 비전 성장과정 합격 자소서",
+        "네이버랩스 컴퓨터 비전 강점 합격 자소서",
+        "네이버랩스 컴퓨터 비전 가치관 합격 자소서",
+        "네이버랩스 컴퓨터 비전 자기소개 자기소개서 합격",
+        "네이버랩스 컴퓨터 비전 성장과정 자기소개서 합격"
+      ],
+      "raw_results": 48,
+      "saved_samples": 4,
+      "backend_counts": {
+        "openai_web_search": 0,
+        "duckduckgo": 48
+      }
+    }
+  ],
+  "stop_reason": "min_unique_domains",
+  "criteria_met": true,
+  "criteria": {
+    "min_samples": 6,
+    "min_total_chars": 8000,
+    "min_unique_domains": 3
+  },
+  "stats": {
+    "sample_count": 4,
+    "total_chars": 5721,
+    "unique_domains": 3
+  },
+  "collected_count": 20,
+  "cleaned_count": 4
+}

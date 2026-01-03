@@ -4,3 +4,10 @@ logs/
 *.faiss
 *.logs
 outputs/
+
+*.yaml
+
+*.txt
+*.html
+kb/
+.DS_Store
