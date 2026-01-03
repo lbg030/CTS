@@ -1,0 +1,6 @@
+logs/
+*.pyc
+
+*.faiss
+*.logs
+outputs/

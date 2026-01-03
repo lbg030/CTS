@@ -1,0 +1,192 @@
+# =========================
+# 공통 경로
+# =========================
+paths:
+  workflow_md: "guide_md/gpt_multi_agent_workflow.md"
+  kb_dir: "kb"
+  company_db_dir: "company_db"
+
+# =========================
+# 모델 선택 정책 (Model Selection Policy)
+# =========================
+# 작업 복잡도에 따른 모델 선택:
+#   - high_quality: 복잡한 추론, 최종 결과물 품질에 직접 영향
+#   - standard: 중간 복잡도, 구조 제안/검토
+#   - fast: 단순 요약, 포맷 변환, 보조 작업
+models:
+  high_quality: "gpt-5.2"    # Integrator, Writer, CTS Scorer
+  standard: "gpt-4o"         # Planner, Reviewer, KB 분석
+  fast: "gpt-4o-mini"        # Length Fixer, 메타 추출, 키워드
+
+# =========================
+# OpenAI 설정
+# =========================
+openai:
+  api_key: ""
+
+  # 토큰 제한 (Agent별)
+  max_tokens:
+    planner: 700
+    writer: 2400
+    reviewer: 650
+    integrator: 2250      # gpt-5.2는 더 긴 출력 허용
+    length_fixer: 900
+    cts_scorer: 2000
+    kb_analyzer: 1500
+    kb_meta: 500
+    kb_profile: 600
+
+  # 재시도 설정
+  retry:
+    max_retries: 2
+    base_sleep_sec: 1.0
+
+  # gpt-5.2 호환성 설정
+  gpt5_compat:
+    use_reasoning: true           # reasoning 파라미터 사용
+    reasoning_effort: "low"       # low / medium / high
+    fallback_on_error: true       # 에러 시 gpt-4o로 폴백
+
+# =========================
+# KB 빌드 설정 (build_kb.py)
+# =========================
+kb:
+  sources:
+    scholar_url: "https://scholar.google.co.kr/citations?user=VLyJXToAAAAJ&hl=ko"
+    assets_dir: "assets"
+
+  chunking:
+    chunk_size: 1200
+    overlap: 200
+    min_chunk_length: 100
+
+  embedding:
+    model: "text-embedding-3-large"
+    batch_size: 32
+    cache_enabled: true
+    cache_path: "cache/kb_embeddings.json"
+
+  scholar:
+    rate_limit_delay: 2.0
+    max_papers: 50
+
+  importance:
+    citation_weight: 0.3
+    venue_weight: 0.3
+    recency_weight: 0.2
+    content_weight: 0.2
+    top_venues:
+      - "cvpr"
+      - "iccv"
+      - "eccv"
+      - "neurips"
+      - "icml"
+      - "iclr"
+      - "ijcai"
+      - "aaai"
+      - "siggraph"
+    good_venues:
+      - "ieee access"
+      - "sensors"
+      - "electronics"
+
+  output:
+    chunks_file: "kb_chunks.jsonl"
+    index_file: "kb_index.faiss"
+    papers_file: "kb_papers.json"
+    summary_file: "kb_summary.json"
+    meta_file: "kb_meta.json"
+    report_file: "build_report.json"
+
+  quality:
+    min_text_per_pdf: 500
+    max_duplicate_ratio: 0.3
+    warn_empty_abstract: true
+
+# =========================
+# 지원 회사/직무
+# =========================
+company:
+  name: "NAVER LABS"
+  role: "Generative Computer Vision Researcher"
+
+# =========================
+# 회사 프로필
+# =========================
+company_profile:
+  company_slug: ""
+  job_posting_urls:
+    - "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340"
+  enable_web_search: true
+  max_source_chars: 12000
+
+# =========================
+# 합격 자소서 구조 패턴 수집
+# =========================
+pass_sop_patterns:
+  enable: true
+  temp_dir: "temp"
+  max_sources: 8
+  min_text_chars: 800
+  max_input_chars: 12000
+  keywords: []   # 필요 시 추가 키워드 (예: ["AI 연구", "3D Vision"])
+  search_queries:
+    - "{company} {role} 합격 자소서"
+    - "{company} {role} 자기소개서 합격"
+    - "{company} {role} 합격 후기 자기소개서"
+  output:
+    raw_dir: "temp/essays_raw"
+    clean_dir: "temp/essays_clean"
+    structured_jsonl: "temp/essays_structured.jsonl"
+    flow_template_json: "temp/flow_templates.json"
+    flow_guide_md: "temp/flow_guide.md"
+
+# =========================
+# RAG 설정
+# =========================
+rag:
+  embed_model: "text-embedding-3-large"
+  top_k: 6
+  max_evidence_chars: 1800
+  min_importance: 0.2
+
+# =========================
+# 자기소개서 생성
+# =========================
+application:
+  question: "[필수] 자신에 대해 자유롭게 표현해주세요."
+  target_char_min: 950
+  target_char_max: 1000
+  max_length_fix_iters: 3
+
+# =========================
+# 출력 설정
+# =========================
+output:
+  template: "outputs/{company_slug}_{timestamp}_q{q_idx}_{question_slug}.md"
+  print_final_to_terminal: false
+
+# =========================
+# 로깅
+# =========================
+logging:
+  level: "INFO"
+  quiet: false
+  to_file: true
+  file_path: "logs/run.log"
+  kb_log_path: "logs/build_kb.log"
+
+# =========================
+# 캐시
+# =========================
+cache:
+  enable_embedding_cache: true
+  embedding_cache_path: "cache/embeddings.json"
+
+# =========================
+# 근거 품질
+# =========================
+evidence_quality:
+  min_hits: 3
+  min_total_chars: 400
+  min_score: 0.20

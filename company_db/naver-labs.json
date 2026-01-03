@@ -1,0 +1,68 @@
+{
+  "company_name": "NAVER LABS",
+  "role": "Generative Computer Vision Researcher (Internship)",
+  "values": [
+    "현실과 디지털 세계를 연결",
+    "공간·사물 디지털트윈 데이터 제작",
+    "로봇·스마트빌딩·AR 핵심 데이터/기술 제공"
+  ],
+  "talent_traits": [
+    "Self-motivated team player",
+    "기본에 충실, 끈기/인내, 강한 실행력",
+    "새 문제를 함께 논의하며 해결을 즐김",
+    "변화 빠른 환경에서도 학습/성장에 개방적"
+  ],
+  "required_qualifications": [
+    "관련 분야 박사과정 또는 연구/개발 경험",
+    "Computer vision·deep learning 이론 전반 이해",
+    "C/C++/Python 등 능숙한 프로그래밍 스킬"
+  ],
+  "preferred_qualifications": [
+    "국제 학술대회 논문 투고 또는 국제 경진대회 입상",
+    "6개월 이상 프로젝트 참여 경험"
+  ],
+  "keywords": [
+    "diffusion-based novel-view synthesis",
+    "sparse images",
+    "diffusion-based in-painting",
+    "view transformation",
+    "geometric-aware diffusion network",
+    "digital twin",
+    "computer vision",
+    "deep learning"
+  ],
+  "writing_tone": "근거중심·간결, 연구문제-접근-결과를 명확히",
+  "do_not_claim": [
+    "국제 학술대회 논문/경진대회 입상(근거 없으면 금지)",
+    "6개월 이상 프로젝트 경험(사실 아니면 금지)",
+    "해당 연구주제 직접 수행/상용화 경험 과장",
+    "NAVER LABS 공식 핵심가치/인재상 문구 단정"
+  ],
+  "references": [
+    {
+      "type": "job_posting_url",
+      "url": "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340",
+      "snippet": "Who We Are: 앞선 비전 기술로 현실-디지털 연결. 디지털트윈 데이터 제작, 다양한 인식 기술 내재화. 로봇·스마트빌딩·AR 서비스 핵심 데이터/기술 제공."
+    },
+    {
+      "type": "job_posting_url",
+      "url": "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340",
+      "snippet": "What You'll Do: 6개월 체험형 인턴. 주제: diffusion 기반 novel-view synthesis(sparse), view 변환 결측 in-painting, geometric-aware diffusion network."
+    },
+    {
+      "type": "job_posting_url",
+      "url": "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340",
+      "snippet": "Required Skills: 관련 분야 박사과정 또는 연구/개발 경험(휴학생·졸업생 가능). CV 및 DL 이론 이해. C/C++/Python 등 프로그래밍."
+    },
+    {
+      "type": "job_posting_url",
+      "url": "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340",
+      "snippet": "Preferred Skills: 국제 학술대회 논문 투고 또는 국제 경진대회 입상, 6개월 이상 프로젝트 참여 경험."
+    },
+    {
+      "type": "job_posting_url",
+      "url": "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340",
+      "snippet": "채용하고 싶은 사람: Self-motivated team player. 기본에 충실, 끈기/인내, 실행력. 함께 논의·해결 즐김. 학습과 성장에 열려 있음."
+    }
+  ]
+}

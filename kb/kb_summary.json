@@ -1,0 +1,124 @@
+{
+  "research_areas": [],
+  "top_keywords": [
+    [
+      "3D Gaussian Splatting",
+      3
+    ],
+    [
+      "온라인 멀티뷰 스테레오",
+      1
+    ],
+    [
+      "신경 렌더링",
+      1
+    ],
+    [
+      "밀집 SLAM",
+      1
+    ],
+    [
+      "3D 모델링",
+      1
+    ],
+    [
+      "깊이 추정",
+      1
+    ],
+    [
+      "뷰 선택",
+      1
+    ],
+    [
+      "모델 완전성",
+      1
+    ],
+    [
+      "온라인 3D 모델링",
+      1
+    ],
+    [
+      "복셀 기반 렌더링",
+      1
+    ],
+    [
+      "SLAM",
+      1
+    ],
+    [
+      "stereo depth estimation",
+      1
+    ],
+    [
+      "online mapping",
+      1
+    ],
+    [
+      "neural rendering",
+      1
+    ],
+    [
+      "Multi-View Stereo",
+      1
+    ],
+    [
+      "Depth Foundation Models",
+      1
+    ],
+    [
+      "3D Reconstruction",
+      1
+    ],
+    [
+      "Bidirectional Refinement",
+      1
+    ],
+    [
+      "Cost Volume Refinement",
+      1
+    ]
+  ],
+  "representative_papers": [
+    {
+      "title": "M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo",
+      "venue": "CVPR",
+      "year": 2026,
+      "contribution": "새로운 MVS 프레임워크를 도입하여 복잡한 상황에서도 깨끗하고 완전한 깊이 맵을 생성.",
+      "importance": 0.6
+    },
+    {
+      "title": "MVS-GS: High-Quality 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
+      "venue": "",
+      "year": 2025,
+      "contribution": "고품질 3DGS 매핑 프레임워크 제안",
+      "importance": 0.359
+    },
+    {
+      "title": "Stereo-GS: Online 3D Gaussian Splatting Mapping Using Stereo Depth Estimation",
+      "venue": "",
+      "year": 2025,
+      "contribution": "스테레오 깊이 추정을 기반으로 한 3DGS 재구성 프레임워크 제안",
+      "importance": 0.35
+    },
+    {
+      "title": "Online 3D Gaussian Splatting Modeling with Novel View Selection",
+      "venue": "",
+      "year": 2025,
+      "contribution": "적응적 뷰 선택을 통한 모델의 완전성 향상",
+      "importance": 0.253
+    }
+  ],
+  "researcher_profile": "이 연구자는 컴퓨터 비전 및 3D 모델링 분야에서 주로 활동하며, 특별히 3D Gaussian Splatting과 온라인 멀티뷰 스테레오 기술을 집중적으로 연구하고 있습니다. 이들의 주요 연구 관심사는 신경 렌더링, 깊이 추정 및 복셀 기반 렌더링을 포함하며, 모델 완전성과 뷰 선택을 고려한 온라인 3D 모델링 기술을 발전시키고 있습니다. 대표 논문으로는 \"M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo\"가 있으며, 온라인 환경에서 고품질의 3D 모델링 솔루션을 제시하고자 다수의 논문을 발표하고 있습니다.",
+  "technical_expertise": [
+    "NeRF",
+    "3DGS",
+    "멀티레이어 퍼셉트론",
+    "Differentiable Volumetric Rendering",
+    "SLAM",
+    "MVS 네트워크",
+    "Gaussian primitives",
+    "불확실성 분석",
+    "전역 번들 어드저스트먼트",
+    "Neural Radiance Fields"
+  ]
+}

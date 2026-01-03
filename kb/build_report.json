@@ -1,0 +1,20 @@
+{
+  "status": "success",
+  "started_at": "2026-01-03T20:44:01.080922",
+  "completed_at": "2026-01-03T20:45:18.006281",
+  "duration_seconds": 76.925359,
+  "sources": {
+    "scholar": 3,
+    "pdf": 5
+  },
+  "papers_processed": 4,
+  "chunks_created": 23,
+  "embedding_dim": 3072,
+  "warnings": [],
+  "errors": [],
+  "models_used": {
+    "meta_extract": "gpt-4o-mini",
+    "analyzer": "gpt-4o",
+    "profile": "gpt-4o"
+  }
+}
