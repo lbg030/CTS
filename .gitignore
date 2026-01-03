@@ -11,3 +11,5 @@ outputs/
 *.html
 kb/
 .DS_Store
+*.json
+*.jsonl

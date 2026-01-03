@@ -1,7 +1,7 @@
 {
   "company": "NAVER LABS",
   "role": "Generative Computer Vision Researcher",
-  "source_count": 3,
+  "source_count": 4,
   "criteria_met": true,
   "stop_reason": "min_unique_domains",
   "flow_guide": {

@@ -1,367 +1,347 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+build_company_profile.py - 회사 프로필 자동 생성
 
+채용공고 URL 또는 웹 검색을 통해 회사 정보를 수집하고
+company_db/<slug>.json으로 저장합니다.
+
+사용법:
+    python build_company_profile.py --config config.yaml
+"""
 
 import os
 import re
 import json
 import argparse
-from typing import List, Dict, Any, Optional
-from urllib.parse import urlparse
+import logging
+from datetime import datetime
+from typing import Dict, Any, List, Optional
 
 import yaml
-import requests
-from bs4 import BeautifulSoup
 from openai import OpenAI
 
 
-# ================================
-# 0) 사용자 설정 (코드에서 직접 입력 가능)
-# ================================
-OPENAI_API_KEY: str = ""
-OPENAI_MODEL: str = "gpt-5.2"  # 기본 GPT-5.2
+# ============================================================
+# 유틸리티
+# ============================================================
 
-
-def load_config(path: str) -> Dict[str, Any]:
+def load_yaml(path: str) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-def resolve_api_key() -> str:
-    key = (OPENAI_API_KEY or "").strip()
-    if key:
-        return key
-    key = os.environ.get("OPENAI_API_KEY", "").strip()
-    if key:
-        return key
-    raise RuntimeError("OPENAI_API_KEY가 필요합니다. 코드 상단에 넣거나 환경변수로 설정하세요.")
+def ensure_dir(path: str) -> None:
+    d = os.path.dirname(path)
+    if d:
+        os.makedirs(d, exist_ok=True)
 
 
 def slugify(name: str) -> str:
-    s = name.strip().lower()
+    s = (name or "").strip().lower()
     s = re.sub(r"[^a-z0-9가-힣]+", "-", s)
     s = re.sub(r"-{2,}", "-", s).strip("-")
     return s or "company"
 
 
-def clamp_text(s: str, max_chars: int) -> str:
-    s = (s or "").strip()
-    return s if len(s) <= max_chars else s[:max_chars].rstrip()
+def setup_logger(cfg: Dict) -> logging.Logger:
+    log_cfg = cfg.get("logging", {})
+    level = log_cfg.get("level", "INFO").upper()
+    quiet = log_cfg.get("quiet", False)
+
+    logger = logging.getLogger("company_profile")
+    logger.setLevel(logging.DEBUG)
+    logger.handlers.clear()
+
+    ch = logging.StreamHandler()
+    ch.setLevel(logging.WARNING if quiet else getattr(logging, level, logging.INFO))
+    ch.setFormatter(logging.Formatter("[%(levelname)s] %(message)s"))
+    logger.addHandler(ch)
+
+    return logger
 
 
-def fetch_url_text(url: str, timeout: int = 15) -> str:
-    """
-    공고 URL에서 텍스트를 가져옵니다.
-    - robots/로그인/스크립트 기반 페이지는 텍스트가 빈약할 수 있습니다.
-    """
-    headers = {"User-Agent": "Mozilla/5.0"}
-    r = requests.get(url, headers=headers, timeout=timeout)
-    r.raise_for_status()
-    html = r.text
-    soup = BeautifulSoup(html, "html.parser")
-
-    # 불필요 요소 제거
-    for tag in soup(["script", "style", "noscript"]):
-        tag.decompose()
-
-    text = soup.get_text(separator="\n")
-    text = re.sub(r"\n{3,}", "\n\n", text)
-    return text.strip()
+def get_api_key(cfg: Dict) -> str:
+    key = cfg.get("openai", {}).get("api_key", "").strip()
+    if key:
+        return key
+    key = os.environ.get("OPENAI_API_KEY", "").strip()
+    if key:
+        return key
+    raise RuntimeError("OPENAI_API_KEY 필요")
 
 
-def web_search_if_enabled(client: OpenAI, query: str, enabled: bool) -> str:
-    """
-    OpenAI Responses web_search tool (가능한 계정에서만 동작).
-    실패하면 빈 문자열.
-    """
-    if not enabled:
-        return ""
-    try:
-        resp = client.responses.create(
-            model=OPENAI_MODEL,
-            input=query,
-            tools=[{"type": "web_search"}],
-            tool_choice="auto",
-            max_output_tokens=900,
-        )
-        return (getattr(resp, "output_text", "") or "").strip()
-    except Exception:
-        return ""
+# ============================================================
+# URL 크롤러
+# ============================================================
 
-
-def call_json_object(client: OpenAI, instructions: str, payload: Dict[str, Any], max_tokens: int = 1400) -> Dict[str, Any]:
-    """
-    JSON 한 덩어리만 받도록 강제 + SDK/모델 호환성 방어형 처리
-    - text.format 미지원 SDK -> 자동 제거 후 재시도
-    - 최종적으로는 JSON 추출 fallback
-    """
-    import json as _json
-
-    # text.format json_object requires the word "json" to appear in input
-    inp = "json\n" + _json.dumps(payload, ensure_ascii=False)
-
-    # 기본 호출 파라미터 (안전하게 dict로 관리)
-    base_kwargs = {
-        "model": OPENAI_MODEL,
-        "instructions": instructions,
-        "input": inp,
-        "max_output_tokens": max_tokens,
-    }
-
-    # ✅ text.format: 지원하면 쓰고, 아니면 제거될 것
-    base_kwargs["text"] = {"format": {"type": "json_object"}}
-
-    def _extract_output_text(resp) -> str:
-        txt = (getattr(resp, "output_text", "") or "").strip()
-        if txt:
-            return txt
-
-        outputs = getattr(resp, "output", None)
-        if outputs:
-            parts = []
-            refusals = []
-            for out in outputs:
-                if getattr(out, "type", None) == "message":
-                    for content in getattr(out, "content", []) or []:
-                        ctype = getattr(content, "type", None)
-                        if ctype == "output_text":
-                            parts.append(getattr(content, "text", "") or "")
-                        elif ctype == "refusal":
-                            refusals.append(getattr(content, "refusal", "") or "")
-            if parts:
-                return "".join(parts).strip()
-            if refusals:
-                raise RuntimeError("모델이 거절했습니다: " + " | ".join([r for r in refusals if r]))
-
-        err = getattr(resp, "error", None)
-        if err:
-            raise RuntimeError(f"OpenAI 응답 오류: {err}")
-        incomplete = getattr(resp, "incomplete_details", None)
-        if incomplete and getattr(incomplete, "reason", None):
-            raise RuntimeError(f"모델 출력이 불완전합니다: {getattr(incomplete, 'reason', None)}")
-
-        return ""
-
-    def _parse_json_text(txt: str) -> Dict[str, Any]:
-        txt = (txt or "").strip()
-        if txt.startswith("\ufeff"):
-            txt = txt.lstrip("\ufeff")
-        if txt.lower().startswith("json"):
-            rest = txt[4:].lstrip()
-            if rest.startswith("{"):
-                txt = rest
-        if not txt:
-            raise ValueError("empty output")
+class JobPostingCrawler:
+    """채용공고 URL에서 텍스트 추출"""
+    
+    def __init__(self, logger: logging.Logger):
+        self.logger = logger
+    
+    def fetch(self, url: str) -> Optional[str]:
+        """URL에서 텍스트 추출"""
         try:
-            return _json.loads(txt)
-        except Exception:
-            pass
-
-        m = re.search(r"```(?:json)?\s*(\{.*\})\s*```", txt, flags=re.S | re.I)
-        if m:
-            return _json.loads(m.group(1))
-
-        start = txt.find("{")
-        end = txt.rfind("}")
-        if start != -1 and end != -1 and end > start:
-            return _json.loads(txt[start:end + 1])
-
-        raise ValueError("json parse failed")
-
-    def _parse_or_raise(txt: str, label: str) -> Dict[str, Any]:
-        try:
-            return _parse_json_text(txt)
+            import requests
+            from bs4 import BeautifulSoup
+            
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+            resp = requests.get(url, headers=headers, timeout=15)
+            resp.raise_for_status()
+            
+            soup = BeautifulSoup(resp.text, "html.parser")
+            
+            # 스크립트/스타일 제거
+            for tag in soup(["script", "style", "nav", "footer", "header"]):
+                tag.decompose()
+            
+            text = soup.get_text(separator="\n", strip=True)
+            
+            # 정리
+            lines = [line.strip() for line in text.split("\n") if line.strip()]
+            text = "\n".join(lines)
+            
+            self.logger.info(f"URL 크롤링 성공: {len(text)}자")
+            return text[:15000]  # 최대 15000자
+            
+        except ImportError:
+            self.logger.warning("requests/beautifulsoup4 미설치 - URL 크롤링 불가")
+            return None
         except Exception as e:
-            snippet = txt[:300].replace("\n", "\\n")
-            raise RuntimeError(f"{label}: JSON 파싱 실패. raw='{snippet}'") from e
-
-    def _try_create(kwargs: Dict[str, Any]):
-        # kwargs는 항상 복사본으로 넘겨서 꼬임 방지
-        return client.responses.create(**kwargs)
-
-    # 1) 1차 시도
-    try:
-        resp = _try_create(dict(base_kwargs))
-        txt = _extract_output_text(resp)
-        return _parse_json_text(txt)
-
-    except TypeError as e:
-        # SDK 미지원 인자(text/response_format 등) 처리
-        msg = str(e)
-
-        kwargs = dict(base_kwargs)
-
-        if "text" in msg or "response_format" in msg:
-            kwargs.pop("text", None)
-            kwargs.pop("response_format", None)
-
-        resp = _try_create(kwargs)
-        txt = _extract_output_text(resp)
-        return _parse_or_raise(txt, "회사 프로필 JSON 파싱 실패 (TypeError fallback)")
-
-    except Exception as e:
-        if isinstance(e, RuntimeError) and any(
-            k in str(e) for k in ("모델이 거절했습니다", "OpenAI 응답 오류", "모델 출력이 불완전합니다")
-        ):
-            # max_output_tokens면 더 큰 토큰으로 1회 재시도
-            if "max_output_tokens" in str(e).lower():
-                kwargs = dict(base_kwargs)
-                kwargs["max_output_tokens"] = max(max_tokens + 800, int(max_tokens * 1.5))
-                kwargs["instructions"] = (
-                    instructions
-                    + "\n\n반드시 유효한 JSON 객체 하나만 출력해라. 키/문자열은 큰따옴표, 코드펜스/설명 금지."
-                    + " 각 리스트는 최대 8개, 각 항목 80자 이내. references는 최대 8개."
-                )
-                resp = _try_create(kwargs)
-                txt = _extract_output_text(resp)
-                return _parse_or_raise(txt, "회사 프로필 JSON 파싱 실패 (max_output_tokens retry)")
-            raise
-        # 2) 모델/SDK 호환 이슈 fallback 재시도
-        msg = str(e).lower()
-        kwargs = dict(base_kwargs)
-
-        # text/response_format 관련 에러면 제거 후 재시도
-        if "text" in msg or "response_format" in msg or "unexpected keyword" in msg:
-            kwargs.pop("text", None)
-            kwargs.pop("response_format", None)
-
-        # JSON 강제 지시를 더 강하게
-        kwargs["instructions"] = instructions + "\n\n반드시 JSON 객체 하나만 출력해라. 다른 텍스트 금지."
-
-        resp = _try_create(kwargs)
-        txt = _extract_output_text(resp)
-        return _parse_or_raise(txt, "회사 프로필 JSON 파싱 실패 (Exception fallback)")
+            self.logger.warning(f"URL 크롤링 실패: {e}")
+            return None
 
 
-def build_company_profile(
-    client: OpenAI,
-    *,
-    company_name: str,
-    role: str,
-    job_posting_urls: List[str],
-    enable_web_search: bool,
-    max_source_chars: int = 12000,
-) -> Dict[str, Any]:
-    """
-    회사 프로필(JSON) 생성:
-    - values / talent_traits / required / preferred / keywords / tone / references
-    """
-    sources: List[Dict[str, Any]] = []
+# ============================================================
+# 프로필 추출기
+# ============================================================
 
-    # 1) 공고 URL 텍스트(최우선 근거)
-    for url in job_posting_urls[:5]:
+class ProfileExtractor:
+    """LLM으로 회사 프로필 추출"""
+    
+    def __init__(self, client: OpenAI, cfg: Dict, logger: logging.Logger):
+        self.client = client
+        self.cfg = cfg
+        self.logger = logger
+        
+        models = cfg.get("models", {})
+        self.model = models.get("standard", "gpt-4o")
+    
+    def extract(self, company_name: str, role: str, raw_text: str) -> Dict[str, Any]:
+        """텍스트에서 회사 프로필 추출"""
+        
+        prompt = f"""다음 채용공고/회사 정보에서 자기소개서 작성에 필요한 정보를 추출하세요.
+
+회사: {company_name}
+직무: {role}
+
+원문:
+{raw_text[:12000]}
+
+JSON으로 응답:
+{{
+    "company_name": "{company_name}",
+    "role": "{role}",
+    "company_description": "회사 소개 2-3문장",
+    "team_description": "팀/부서 소개 (있으면)",
+    "values": ["핵심가치1", "핵심가치2"],
+    "talent_traits": ["인재상1", "인재상2"],
+    "required_qualifications": ["필수자격1", "필수자격2"],
+    "preferred_qualifications": ["우대사항1", "우대사항2"],
+    "responsibilities": ["담당업무1", "담당업무2"],
+    "keywords": ["기술키워드1", "기술키워드2"],
+    "writing_tone": "명확하고 구체적인 근거 중심",
+    "do_not_claim": ["근거 없는 수치", "과장된 표현"]
+}}
+
+규칙:
+- 원문에 없는 내용은 추측하지 말고 빈 리스트로
+- 각 항목은 간결하게 (20자 이내)
+- keywords는 기술/도메인 키워드 중심"""
+
         try:
-            raw = fetch_url_text(url)
-            sources.append({
-                "type": "job_posting_url",
-                "url": url,
-                "text": clamp_text(raw, max_source_chars)
-            })
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": prompt}],
+                response_format={"type": "json_object"},
+                max_tokens=1500
+            )
+            
+            result = json.loads(resp.choices[0].message.content)
+            self.logger.info(f"프로필 추출 완료: {len(result.get('keywords', []))}개 키워드")
+            return result
+            
         except Exception as e:
-            sources.append({
-                "type": "job_posting_url",
-                "url": url,
-                "text": f"(가져오기 실패: {e})"
-            })
+            self.logger.error(f"프로필 추출 실패: {e}")
+            return self._default_profile(company_name, role)
+    
+    def _default_profile(self, company_name: str, role: str) -> Dict[str, Any]:
+        """기본 프로필 템플릿"""
+        return {
+            "company_name": company_name,
+            "role": role,
+            "company_description": "",
+            "team_description": "",
+            "values": [],
+            "talent_traits": [],
+            "required_qualifications": [],
+            "preferred_qualifications": [],
+            "responsibilities": [],
+            "keywords": [],
+            "writing_tone": "명확하고 구체적인 근거 중심",
+            "do_not_claim": ["근거 없는 수치", "근거 없는 논문/수상", "과장된 표현"]
+        }
+    
+    def enrich_with_search(self, profile: Dict[str, Any]) -> Dict[str, Any]:
+        """웹 검색으로 프로필 보강 (선택적)"""
+        
+        company = profile.get("company_name", "")
+        role = profile.get("role", "")
+        
+        if not company:
+            return profile
+        
+        search_prompt = f"""다음 회사/직무에 대해 자기소개서 작성에 도움될 정보를 제공하세요.
 
-    # 2) web_search 보조(옵션)
-    if enable_web_search:
-        q1 = f"{company_name} 인재상 핵심가치"
-        q2 = f"{company_name} 채용 {role} 자격요건 우대사항"
-        w1 = web_search_if_enabled(client, q1, True)
-        w2 = web_search_if_enabled(client, q2, True)
-        if w1:
-            sources.append({"type": "web_search", "query": q1, "text": clamp_text(w1, 6000)})
-        if w2:
-            sources.append({"type": "web_search", "query": q2, "text": clamp_text(w2, 6000)})
+회사: {company}
+직무: {role}
 
-    instructions = (
-        "너는 채용공고/기업정보를 구조화하는 에이전트다.\n"
-        "출력은 JSON 하나만. 불필요한 설명 금지.\n"
-        "반드시 유효한 JSON만 출력해라(키/문자열은 큰따옴표, 코드펜스/설명 금지).\n"
-        "각 리스트는 최대 8개, 각 항목 80자 이내로 간결하게 써라.\n"
-        "references는 최대 8개만 출력해라.\n"
-        "근거(sources)에 없는 내용을 단정하지 마라. 불확실하면 'unknown' 또는 빈 리스트로 둬라.\n"
-        "아래 스키마를 최대한 채워라:\n"
-        "{\n"
-        "  company_name: str,\n"
-        "  role: str,\n"
-        "  values: [str],               # 기업 핵심가치/인재상 키워드\n"
-        "  talent_traits: [str],        # 선호 역량/태도(협업/주도성 등)\n"
-        "  required_qualifications: [str],\n"
-        "  preferred_qualifications: [str],\n"
-        "  keywords: [str],             # 자기소개서에 녹일 키워드(기술/도메인)\n"
-        "  writing_tone: str,           # 문체 가이드(예: 간결/근거중심/정량)\n"
-        "  do_not_claim: [str],         # 근거 없으면 쓰면 안 되는 주장 유형\n"
-        "  references: [ {type, url|query, snippet} ]  # 추적 가능한 스니펫(짧게)\n"
-        "}\n"
-        "references.snippet은 200자 이내로 압축해라.\n"
-    )
+기존 정보:
+- 핵심가치: {profile.get('values', [])}
+- 인재상: {profile.get('talent_traits', [])}
 
-    payload = {
-        "company_name": company_name,
-        "role": role,
-        "sources": sources,
-    }
+JSON으로 응답:
+{{
+    "additional_values": ["추가 핵심가치"],
+    "additional_traits": ["추가 인재상"],
+    "company_culture": "회사 문화 특징",
+    "industry_focus": "주요 사업 분야"
+}}
 
-    prof = call_json_object(client, instructions, payload)
+규칙: 공식적으로 알려진 정보만 사용"""
 
-    # references.snippet 축약(안전)
-    refs = []
-    for r in prof.get("references", [])[:12]:
-        snip = clamp_text((r.get("snippet") or ""), 200)
-        rr = dict(r)
-        rr["snippet"] = snip
-        refs.append(rr)
-    prof["references"] = refs
+        try:
+            resp = self.client.chat.completions.create(
+                model=self.model,
+                messages=[{"role": "user", "content": search_prompt}],
+                response_format={"type": "json_object"},
+                max_tokens=800
+            )
+            
+            extra = json.loads(resp.choices[0].message.content)
+            
+            # 병합
+            profile["values"] = list(set(profile.get("values", []) + extra.get("additional_values", [])))
+            profile["talent_traits"] = list(set(profile.get("talent_traits", []) + extra.get("additional_traits", [])))
+            profile["company_culture"] = extra.get("company_culture", "")
+            profile["industry_focus"] = extra.get("industry_focus", "")
+            
+            self.logger.info("웹 검색으로 프로필 보강 완료")
+            
+        except Exception as e:
+            self.logger.warning(f"프로필 보강 실패: {e}")
+        
+        return profile
 
-    # 최소 필드 보정
-    prof.setdefault("company_name", company_name)
-    prof.setdefault("role", role)
-    prof.setdefault("values", [])
-    prof.setdefault("talent_traits", [])
-    prof.setdefault("required_qualifications", [])
-    prof.setdefault("preferred_qualifications", [])
-    prof.setdefault("keywords", [])
-    prof.setdefault("writing_tone", "명확/간결/근거 중심")
-    prof.setdefault("do_not_claim", ["근거 없는 수치", "근거 없는 수상/논문", "근거 없는 경력/직책"])
 
-    return prof
-
+# ============================================================
+# 메인
+# ============================================================
 
 def main():
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--config", default="config.yaml")
-    ap.add_argument("--company", default=None)
-    ap.add_argument("--role", default=None)
-    ap.add_argument("--job_url", action="append", default=[])
-    args = ap.parse_args()
-
-    cfg = load_config(args.config)
-    company_name = args.company or cfg["company"]["name"]
-    role = args.role or cfg["company"]["role"]
-
-    job_urls = args.job_url[:] if args.job_url else cfg["company_profile"].get("job_posting_urls", [])
-    # 요구 조건: web search는 항상 활성화
-    enable_web = True
-
-    out_dir = cfg["company_profile"].get("output_dir", "company_db")
-    os.makedirs(out_dir, exist_ok=True)
-    out_path = os.path.join(out_dir, f"{slugify(company_name)}.json")
-
-    client = OpenAI(api_key=resolve_api_key())
-
-    prof = build_company_profile(
-        client,
-        company_name=company_name,
-        role=role,
-        job_posting_urls=job_urls,
-        enable_web_search=enable_web,
-        max_source_chars=int(cfg["company_profile"].get("max_source_chars", 12000)),
-    )
-
-    with open(out_path, "w", encoding="utf-8") as f:
-        json.dump(prof, f, ensure_ascii=False, indent=2)
-
-    print("[OK] company profile saved:", out_path)
+    parser = argparse.ArgumentParser(description="회사 프로필 빌더")
+    parser.add_argument("--config", type=str, default="config.yaml")
+    args = parser.parse_args()
+    
+    if not os.path.exists(args.config):
+        print(f"[ERROR] 설정 파일 없음: {args.config}")
+        return
+    
+    cfg = load_yaml(args.config)
+    logger = setup_logger(cfg)
+    
+    logger.info("=" * 50)
+    logger.info("회사 프로필 빌드 시작")
+    logger.info("=" * 50)
+    
+    # 설정 로드
+    company_cfg = cfg.get("company", {})
+    profile_cfg = cfg.get("company_profile", {})
+    
+    company_name = company_cfg.get("name", "")
+    role = company_cfg.get("role", "")
+    
+    if not company_name:
+        logger.error("config.yaml에 company.name 필요")
+        return
+    
+    company_slug = profile_cfg.get("company_slug") or slugify(company_name)
+    job_urls = profile_cfg.get("job_posting_urls", [])
+    enable_search = profile_cfg.get("enable_web_search", True)
+    max_chars = profile_cfg.get("max_source_chars", 12000)
+    
+    # 출력 경로
+    company_db_dir = cfg.get("paths", {}).get("company_db_dir", "company_db")
+    output_path = os.path.join(company_db_dir, f"{company_slug}.json")
+    ensure_dir(output_path)
+    
+    # OpenAI 클라이언트
+    client = OpenAI(api_key=get_api_key(cfg))
+    
+    # 크롤러 & 추출기
+    crawler = JobPostingCrawler(logger)
+    extractor = ProfileExtractor(client, cfg, logger)
+    
+    # URL에서 텍스트 수집
+    all_text = []
+    
+    for url in job_urls:
+        if not url or not url.strip():
+            continue
+        logger.info(f"URL 크롤링: {url[:60]}...")
+        text = crawler.fetch(url.strip())
+        if text:
+            all_text.append(text)
+    
+    if all_text:
+        combined_text = "\n\n---\n\n".join(all_text)[:max_chars]
+        logger.info(f"총 {len(combined_text)}자 수집")
+    else:
+        logger.warning("URL에서 텍스트 수집 실패 - 기본 프로필 생성")
+        combined_text = f"회사: {company_name}\n직무: {role}"
+    
+    # 프로필 추출
+    logger.info("프로필 추출 중...")
+    profile = extractor.extract(company_name, role, combined_text)
+    
+    # 웹 검색으로 보강 (선택적)
+    if enable_search:
+        logger.info("프로필 보강 중...")
+        profile = extractor.enrich_with_search(profile)
+    
+    # 메타데이터 추가
+    profile["_meta"] = {
+        "created_at": datetime.now().isoformat(),
+        "source_urls": job_urls,
+        "slug": company_slug
+    }
+    
+    # 저장
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(profile, f, ensure_ascii=False, indent=2)
+    
+    logger.info("=" * 50)
+    logger.info(f"회사 프로필 저장 완료: {output_path}")
+    logger.info(f"  - 핵심가치: {len(profile.get('values', []))}개")
+    logger.info(f"  - 인재상: {len(profile.get('talent_traits', []))}개")
+    logger.info(f"  - 필수자격: {len(profile.get('required_qualifications', []))}개")
+    logger.info(f"  - 우대사항: {len(profile.get('preferred_qualifications', []))}개")
+    logger.info(f"  - 키워드: {len(profile.get('keywords', []))}개")
+    logger.info("=" * 50)
 
 
 if __name__ == "__main__":

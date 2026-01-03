@@ -4,7 +4,7 @@
   "questions": [
     "[필수] 자신에 대해 자유롭게 표현해주세요."
   ],
-  "source_count": 3,
+  "source_count": 4,
   "criteria_met": true,
   "stop_reason": "min_unique_domains",
   "stats": {

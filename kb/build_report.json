@@ -1,14 +1,14 @@
 {
   "status": "success",
-  "started_at": "2026-01-03T23:07:06.493492",
-  "completed_at": "2026-01-03T23:08:36.429089",
-  "duration_seconds": 89.935597,
+  "started_at": "2026-01-04T00:29:48.274240",
+  "completed_at": "2026-01-04T00:30:53.473883",
+  "duration_seconds": 65.199643,
   "sources": {
-    "scholar": 3,
+    "scholar": 0,
     "pdf": 5
   },
-  "papers_processed": 5,
-  "chunks_created": 29,
+  "papers_processed": 4,
+  "chunks_created": 24,
   "embedding_dim": 3072,
   "warnings": [],
   "errors": [],

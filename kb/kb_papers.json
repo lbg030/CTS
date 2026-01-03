@@ -1,63 +1,5 @@
 [
   {
-    "paper_id": "c61cbd659b1d",
-    "title": "MVS-GS: High-Quality 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
-    "authors": [
-      "Byeonggwon Lee",
-      "Junkyu Park",
-      "Khang Truong Giang",
-      "Sungho Jo",
-      "Soohwan Song"
-    ],
-    "year": 2025,
-    "venue": "",
-    "citations": 3,
-    "importance_score": 0.359,
-    "keywords": [
-      "온라인 멀티뷰 스테레오",
-      "3D Gaussian Splatting",
-      "신경 렌더링",
-      "밀집 SLAM",
-      "3D 모델링",
-      "깊이 추정"
-    ],
-    "key_contributions": [
-      "고품질 3DGS 매핑을 위한 새로운 프레임워크 제안",
-      "온라인 MVS를 통한 정밀한 깊이 필터링 과정 도입"
-    ],
-    "problem_addressed": "RGB 이미지에서 실시간으로 3D 모델을 생성하는 어려움",
-    "proposed_method": "온라인 MVS를 사용하여 고품질의 3DGS 모델을 생성",
-    "results_summary": "실내 장면에서 PSNR 평균 약 2 dB 개선, 대규모 항공 장면에서 10.28 dB 개선"
-  },
-  {
-    "paper_id": "9eac4875c0cd",
-    "title": "Online 3D Gaussian Splatting Modeling with Novel View Selection",
-    "authors": [
-      "Byeonggwon Lee",
-      "Junkyu Park",
-      "Khang Truong Giang",
-      "Soohwan Song"
-    ],
-    "year": 2025,
-    "venue": "",
-    "citations": 1,
-    "importance_score": 0.253,
-    "keywords": [
-      "3DGS",
-      "SLAM",
-      "Gaussian Splatting",
-      "MVS",
-      "Depth Estimation"
-    ],
-    "key_contributions": [
-      "대학교 3DGS 모델링을 위한 새로운 뷰 선택 접근법 제안",
-      "불확실성 정의를 통한 효과적인 비키프레임 선택"
-    ],
-    "problem_addressed": "기존 3DGS 모델링의 불완전함을 극복",
-    "proposed_method": "적응형 뷰 선택과 비키프레임 활용을 통한 3DGS 모델링 개선",
-    "results_summary": "제안된 방법론이 기존 최신 방법들보다 높은 성능을 보여줌"
-  },
-  {
     "paper_id": "ebd43503423c",
     "title": "Stereo-GS: Online 3D Gaussian Splatting Mapping Using Stereo Depth Estimation",
     "authors": [
@@ -67,9 +9,9 @@
       "Soohwan Song"
     ],
     "year": 2025,
-    "venue": "",
+    "venue": "Electronics",
     "citations": 0,
-    "importance_score": 0.35,
+    "importance_score": 0.5,
     "keywords": [
       "3D Gaussian Splatting",
       "SLAM",
@@ -78,12 +20,12 @@
       "neural rendering"
     ],
     "key_contributions": [
-      "스테레오 깊이 추정을 통한 온라인 3DGS 재구성 프레임워크 제안",
-      "튼튼한 스테레오 기반 깊이 추정 파이프라인 도입"
+      "스테레오 기반 깊이 추정으로 구동되는 온라인 고충실도의 3DGS 재구성 프레임워크 제안",
+      "깊이 신뢰성을 높이기 위한 견고한 스테레오 기반 깊이 추정 파이프라인 도입"
     ],
-    "problem_addressed": "기존 3DGS 방법의 온라인 SLAM에의 부적합성 해결",
-    "proposed_method": "실시간 스테레오 이미지 스트림을 사용하는 3D Gaussian Splatting 프레임워크 개발",
-    "results_summary": "EuRoC에서 평균 PSNR 23.70, TartanAir에서 22.47을 기록하며 뛰어난 성능을 입증"
+    "problem_addressed": "기존 3DGS 방법의 오프라인 의존성 및 온라인 SLAM 시나리오에서의 비효율성",
+    "proposed_method": "스테레오 이미지 스트림으로부터의 실시간 3DGS 모델링 및 정교화",
+    "results_summary": "EuRoC와 TartanAir에서 각각 평균 PSNR 23.70 및 22.47을 기록하며, 기존 방법 대비 성능 향상"
   },
   {
     "paper_id": "07af93b9bae7",
@@ -96,41 +38,73 @@
     "citations": 0,
     "importance_score": 0.6,
     "keywords": [
-      "MVS",
-      "DFM",
-      "양방향 융합",
-      "3D 재구성"
+      "Monocular Depth Estimation",
+      "Multi-View Stereo",
+      "Depth Foundation Models",
+      "3D Reconstruction"
     ],
     "key_contributions": [
-      "DFM과 MVS를 통합하여 3D 재구성을 보장하는 새로운 MVS 프레임워크 제안",
-      "MVS 깊이를 사용하여 단안의 규모 일관성을 맞추는 양방향 상호 개선 메커니즘 제안"
+      "DFMs로부터 단안 우선순위를 통합하여 MVS를 통해 깨끗하고 완전한 깊이 지도를 생성하는 새로운 MVS 프레임워크를 도입합니다.",
+      "양방향 상호 보완 메커니즘을 제안하여, MVS 깊이를 활용하여 단안 깊이를 조정하고, 단안 깊이를 통해 MVS 구조를 향상시킵니다."
     ],
-    "problem_addressed": "시야 겹침이 적거나 복잡한 기하학적 구조에서 MVS의 일반화 어려움",
-    "proposed_method": "DFM과 MVS 깊이를 양방향으로 통합하여 깊이 추정 정확도 향상",
-    "results_summary": "다양한 벤치마크에서 최첨단 MVS 방법을 능가하며, 코드가 공개됨"
+    "problem_addressed": "MVS가 새로운 장면의 복잡한 기하학과 조명 조건에서 일반화하는데 어려움을 겪음.",
+    "proposed_method": "DFM과 MVS를 양방향으로 결합하여 완전한 깊이 지도를 생성하는 새로운 프레임워크.",
+    "results_summary": "본 방법은 다양한 벤치마크에서 높은 정확성과 강력한 일반화 성능을 보여줍니다."
   },
   {
-    "paper_id": "4df008a0b04d",
-    "title": "Online 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
+    "paper_id": "9eac4875c0cd",
+    "title": "Online 3D Gaussian Splatting Modeling with Novel View Selection",
     "authors": [
-      "이병권"
+      "Byeonggwon Lee",
+      "Junkyu Park",
+      "Khang Truong Giang",
+      "Soohwan Song"
     ],
     "year": 2024,
-    "venue": "IEEE Access",
+    "venue": "학회/저널명",
     "citations": 0,
-    "importance_score": 0.44999999999999996,
+    "importance_score": 0.2,
+    "keywords": [
+      "3D Gaussian Splatting",
+      "적응형 뷰 선택",
+      "온라인 3D 모델링",
+      "SLAM"
+    ],
+    "key_contributions": [
+      "적응형 뷰 선택을 통한 모델 완전성 개선",
+      "비키프레임의 최적 뷰 선택을 위한 불확실성 정의"
+    ],
+    "problem_addressed": "키프레임에 의한 불완전한 3D 재구성 문제",
+    "proposed_method": "비키프레임을 포함한 적응형 뷰 선택 방법",
+    "results_summary": "제안된 방법은 두 가지 벤치마크에서 탁월한 성능을 보여주었으며, 복잡한 실외 환경을 처리할 때 높은 정확도를 입증했습니다."
+  },
+  {
+    "paper_id": "c61cbd659b1d",
+    "title": "MVS-GS: High-Quality 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
+    "authors": [
+      "Byeonggwon Lee",
+      "Junkyu Park",
+      "Khang Truong Giang",
+      "Sungho Jo",
+      "Soohwan Song"
+    ],
+    "year": 2025,
+    "venue": "학술 저널",
+    "citations": 0,
+    "importance_score": 0.25,
     "keywords": [
       "3D Gaussian Splatting",
       "Multi-View Stereo",
+      "Dense Geometry",
       "SLAM",
-      "사각 복원"
+      "Online Optimization"
     ],
     "key_contributions": [
-      "온라인 MVS와 3DGS를 결합한 새로운 파이프라인 제안",
-      "Uncertainty-aware NVS를 통한 향상된 3D Scene 완성도"
+      "Online MVS와 3DGS를 결합한 새로운 파이프라인 개발",
+      "대규모 실외 환경에서도 높은 강건성을 보장하는 재구성 품질"
     ],
-    "problem_addressed": "기존 3D 복원 방법의 기하학적 붕괴 문제 해결",
-    "proposed_method": "온라인 MVS를 활용한 강건한 3D Gaussian Splatting 매핑",
-    "results_summary": "PSNR 11.6% 향상, 실시간성 확보 및 대규모 실외 환경에서도 높은 재구성 품질"
+    "problem_addressed": "Sparse Depth 의존으로 인한 기하학적 붕괴 문제를 해결합니다.",
+    "proposed_method": "Online MVS Depth Guidance를 기반으로 한 강건한 3D 재구성",
+    "results_summary": "KAIST 드론 데이터를 통해 SOTA 대비 구조적으로 더 우수한 성능을 입증하였습니다."
   }
 ]

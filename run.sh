@@ -1,12 +1,37 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# ===== 사용자 설정 =====
-PIPELINE_SCRIPT="./pipeline.sh"
-CONFIG_PATH="./config.yaml"
-LOG_DIR="./logs"
-QUERY_TEXT="3D reconstruction"   # run_pipeline.sh가 query를 고정이면 무시됨(참고용)
-# ======================
+# ===== 기본값 (필요 시 인자/환경변수로 덮어쓰기) =====
+PIPELINE_SCRIPT="${PIPELINE_SCRIPT:-./pipeline.sh}"
+CONFIG_PATH="${CONFIG_PATH:-./config.yaml}"
+LOG_DIR="${LOG_DIR:-./logs}"
+QUERY_TEXT="${QUERY_TEXT:-3D reconstruction}"
+# ===================================================
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --config)
+      CONFIG_PATH="$2"
+      shift 2
+      ;;
+    --query)
+      QUERY_TEXT="$2"
+      shift 2
+      ;;
+    --pipeline)
+      PIPELINE_SCRIPT="$2"
+      shift 2
+      ;;
+    --log-dir)
+      LOG_DIR="$2"
+      shift 2
+      ;;
+    *)
+      echo "Usage: $0 [--config path] [--query text] [--pipeline path] [--log-dir dir]"
+      exit 1
+      ;;
+  esac
+done
 
 # 현재 경로 기준으로 실행(스크립트 위치로 이동)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -21,6 +46,7 @@ echo "======================================"
 echo " Master Runner"
 echo " - pipeline script : ${PIPELINE_SCRIPT}"
 echo " - config          : ${CONFIG_PATH}"
+echo " - query           : ${QUERY_TEXT}"
 echo " - log file        : ${LOG_FILE}"
 echo "======================================"
 
@@ -42,7 +68,7 @@ chmod +x "${PIPELINE_SCRIPT}"
 # 파이프라인 실행 + 로그 저장
 echo "[STEP] 파이프라인 실행 (로그 저장 시작)"
 set +e
-bash "${PIPELINE_SCRIPT}" 2>&1 | tee "${LOG_FILE}"
+bash "${PIPELINE_SCRIPT}" --config "${CONFIG_PATH}" --query "${QUERY_TEXT}" 2>&1 | tee "${LOG_FILE}"
 EXIT_CODE=${PIPESTATUS[0]}
 set -e
 

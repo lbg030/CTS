@@ -1,9 +1,9 @@
 {
-  "total_papers": 5,
-  "total_chunks": 29,
+  "total_papers": 4,
+  "total_chunks": 24,
   "embedding_dim": 3072,
   "sources": {
-    "scholar": 3,
+    "scholar": 0,
     "pdf": 5
   },
   "models_used": {
@@ -11,5 +11,5 @@
     "analyzer": "gpt-4o",
     "profile": "gpt-4o"
   },
-  "created_at": "2026-01-03T23:08:36.429058"
+  "created_at": "2026-01-04T00:30:53.473845"
 }

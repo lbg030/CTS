@@ -7,14 +7,15 @@
 
 1) **회사/공고 사전정보 구축**: `build_company_profile.py` → `company_db/<slug>.json`  
 2) **사용자 자료 RAG KB 구축**: `build_kb.py` (PDF + workflow md) → `kb/`  
-3) **합격 자소서 구조 패턴 수집**: `collect_pass_sop_patterns.py` → `temp/`  
-4) **자기소개서 생성**: `run_sop.py` (회사 프로필 + 근거 top-k + 구조 가이드) → `outputs/*.md`
+3) **합격 자소서 구조 패턴 수집**: `collect_pass_sop_patterns.py` → `temp/`, `patterns/`  
+4) **자기소개서 생성**: `run_sop.py` (회사 프로필 + 근거 top-k + 구조 가이드/패턴 요약) → `outputs/*.md`
 
 > ✅ 최신 `run_sop.py`는  
 > - **임베딩 캐시**로 비용 절약  
 > - **근거 부족 감지** 시 결과 md에 경고 섹션 자동 삽입  
 > - **출력 파일명에 질문 슬러그 포함**(옵션)  
 > - **회사 프로필 스키마 보정**으로 누락/타입 이상에 강함  
+> - **합격 자소서 패턴 요약(md/json/structured) 자동 반영**  
 > - **진행 로그를 촘촘하게 출력**(단계별 + 소요시간)
 
 ---
@@ -59,6 +60,8 @@ project/
   kb/            # build_kb.py 실행 후 생성
   company_db/    # build_company_profile.py 실행 후 생성
   temp/          # 합격 자소서 구조 패턴(선택)
+  patterns/      # 합격 자소서 구조 패턴 요약/로그(선택)
+    sources/     # 수집 URL/검색 로그
   outputs/       # run_sop.py 결과(.md)
   cache/         # 임베딩 캐시(옵션)
   logs/          # 실행 로그(옵션)
@@ -82,6 +85,8 @@ project/
 - `logging`: 진행 로그 레벨/파일 저장
 - `cache`: 임베딩 캐시 on/off
 - `evidence_quality`: 근거 부족 감지 임계값
+
+`pass_sop_patterns`에서는 **계층적 폴백 검색**, **회사/직무 별칭**, **중단 기준**, **검색 백엔드(DDG 폴백)** 등을 조절할 수 있습니다.
 
 ---
 
@@ -138,7 +143,7 @@ python build_kb.py \
 ## 5) 3단계: 합격 자소서 구조 패턴 수집 (선택)
 
 회사명/직무 키워드를 기반으로 공개 합격 자소서를 자동 수집하고, 문장 복사 없이 구조적 흐름만 추출합니다.  
-결과는 `temp/`에 저장되고 `run_sop.py`에서 **가이드로만** 사용됩니다.
+결과는 `temp/`/`patterns/`에 저장되며, `run_sop.py`에서 **구조 가이드로만** 사용됩니다.
 
 ### 실행
 ```bash
@@ -150,6 +155,12 @@ python collect_pass_sop_patterns.py --config config.yaml
 - `temp/essays_clean/` (정제 텍스트)
 - `temp/essays_structured.jsonl` (구조 패턴)
 - `temp/flow_guide.md` (구조 가이드)
+- `patterns/pass_sop_patterns.json` (구조 요약 + 상태)
+- `patterns/pass_sop_patterns.md` (가이드 문서)
+- `patterns/sources/search_log.json` (검색 로그)
+- `patterns/sources/sources.jsonl` (수집 URL 메타)
+
+> 참고: `run_sop.py`는 위 결과 중 **구조 요약만** 사용하며, 원문 텍스트(`temp/essays_raw`, `temp/essays_clean`)는 직접 사용하지 않습니다.
 
 ## 6) 4단계: 자기소개서 생성(run_sop.py)
 
@@ -273,4 +284,7 @@ python collect_pass_sop_patterns.py --config config.yaml
 
 # 4) 자기소개서 생성 (결과는 outputs/*.md)
 python run_sop.py --config config.yaml
+
+# 전체 파이프라인 실행 (build_kb → 회사 프로필 → 합격 자소서 → run_sop)
+./run.sh --config config.yaml --query "3D reconstruction"
 ```

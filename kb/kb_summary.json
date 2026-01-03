@@ -1,7 +1,5 @@
 {
-  "research_areas": [
-    "depth estimation"
-  ],
+  "research_areas": [],
   "top_keywords": [
     [
       "3D Gaussian Splatting",
@@ -12,40 +10,8 @@
       3
     ],
     [
-      "MVS",
+      "Multi-View Stereo",
       2
-    ],
-    [
-      "온라인 멀티뷰 스테레오",
-      1
-    ],
-    [
-      "신경 렌더링",
-      1
-    ],
-    [
-      "밀집 SLAM",
-      1
-    ],
-    [
-      "3D 모델링",
-      1
-    ],
-    [
-      "깊이 추정",
-      1
-    ],
-    [
-      "3DGS",
-      1
-    ],
-    [
-      "Gaussian Splatting",
-      1
-    ],
-    [
-      "Depth Estimation",
-      1
     ],
     [
       "stereo depth estimation",
@@ -60,23 +26,31 @@
       1
     ],
     [
-      "DFM",
+      "Monocular Depth Estimation",
       1
     ],
     [
-      "양방향 융합",
+      "Depth Foundation Models",
       1
     ],
     [
-      "3D 재구성",
+      "3D Reconstruction",
       1
     ],
     [
-      "Multi-View Stereo",
+      "적응형 뷰 선택",
       1
     ],
     [
-      "사각 복원",
+      "온라인 3D 모델링",
+      1
+    ],
+    [
+      "Dense Geometry",
+      1
+    ],
+    [
+      "Online Optimization",
       1
     ]
   ],
@@ -85,49 +59,42 @@
       "title": "M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo",
       "venue": "CVPR",
       "year": 2026,
-      "contribution": "DFM과 MVS를 통합하여 3D 재구성을 보장하는 새로운 MVS 프레임워크 제안",
+      "contribution": "DFMs로부터 단안 우선순위를 통합하여 MVS를 통해 깨끗하고 완전한 깊이 지도를 생성하는 새로운 MVS 프레임워크를 도입합니다.",
       "importance": 0.6
     },
     {
-      "title": "Online 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
-      "venue": "IEEE Access",
-      "year": 2024,
-      "contribution": "온라인 MVS와 3DGS를 결합한 새로운 파이프라인 제안",
-      "importance": 0.44999999999999996
+      "title": "Stereo-GS: Online 3D Gaussian Splatting Mapping Using Stereo Depth Estimation",
+      "venue": "Electronics",
+      "year": 2025,
+      "contribution": "스테레오 기반 깊이 추정으로 구동되는 온라인 고충실도의 3DGS 재구성 프레임워크 제안",
+      "importance": 0.5
     },
     {
       "title": "MVS-GS: High-Quality 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
-      "venue": "",
+      "venue": "학술 저널",
       "year": 2025,
-      "contribution": "고품질 3DGS 매핑을 위한 새로운 프레임워크 제안",
-      "importance": 0.359
-    },
-    {
-      "title": "Stereo-GS: Online 3D Gaussian Splatting Mapping Using Stereo Depth Estimation",
-      "venue": "",
-      "year": 2025,
-      "contribution": "스테레오 깊이 추정을 통한 온라인 3DGS 재구성 프레임워크 제안",
-      "importance": 0.35
+      "contribution": "Online MVS와 3DGS를 결합한 새로운 파이프라인 개발",
+      "importance": 0.25
     },
     {
       "title": "Online 3D Gaussian Splatting Modeling with Novel View Selection",
-      "venue": "",
-      "year": 2025,
-      "contribution": "대학교 3DGS 모델링을 위한 새로운 뷰 선택 접근법 제안",
-      "importance": 0.253
+      "venue": "학회/저널명",
+      "year": 2024,
+      "contribution": "적응형 뷰 선택을 통한 모델 완전성 개선",
+      "importance": 0.2
     }
   ],
-  "researcher_profile": "이 연구자는 깊이 추정을 중심으로 다양한 3D 모델링 기법을 연구하고 있으며, 특히 3D Gaussian Splatting을 활용한 혁신적인 방법론을 개발하고 있습니다. 주요 연구 분야는 SLAM, MVS, 그리고 신경 렌더링을 포함하며, 온라인 멀티뷰 스테레오를 통해 실시간 3D 모델링을 구현하는 데 주력하고 있습니다. 이 연구자의 대표적인 논문인 \"M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo\"는 2026년 CVPR에 게재되었으며, 3DGS를 활용한 여러 논문은 IEEE Access와 다양한 학술지에 발표되었습니다. 연구는 고품질의 깊이 추정과 3D 매핑을 위한 혁신적 솔루션을 제공하는 데 중점을 두고 있습니다.",
+  "researcher_profile": "이 연구자는 3D Gaussian Splatting과 관련된 다양한 분야를 탐구하는 전문가로서, 특히 SLAM, Multi-View Stereo, 그리고 stereo depth estimation에 주목합니다. 그들의 연구는 주로 온라인 맵핑과 신경 렌더링을 결합하여 실시간 3D 재구성을 향상시키는 데 중점을 두고 있습니다. 대표 논문으로는 \"M2Depth: Unifying Monocular Depth Foundation Priors with Multi-View Stereo\"와 \"Stereo-GS: Online 3D Gaussian Splatting Mapping Using Stereo Depth Estimation\" 등이 있으며, 이는 새로운 깊이 추정 모델과 적응형 뷰 선택 기술을 통해 3D 모델링의 정밀도를 한층 높였습니다. 자율주행, 로봇 공학 및 가상현실 등 다양한 분야에 기여할 수 있는 혁신적인 연구를 지속하고 있습니다.",
   "technical_expertise": [
     "DROID-SLAM",
-    "NeRF",
-    "3DGS",
-    "MVS",
-    "지속적인 깊이 추정",
-    "병렬 백엔드 모듈",
-    "SLAM",
-    "Neural Rendering",
-    "Multi-View Stereo",
-    "Differentiable Rendering"
+    "stereo visual SLAM",
+    "FoundationStereo",
+    "differentiable rendering",
+    "Deep Learning",
+    "Computer Vision",
+    "Attention Mechanism",
+    "Cost Volume Refinement",
+    "Dense SLAM",
+    "NeRF"
   ]
 }
