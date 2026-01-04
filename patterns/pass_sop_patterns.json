@@ -1,50 +1,56 @@
 {
   "company": "NAVER LABS",
-  "role": "회사/직무와의 적합성 및 포부",
+  "role": "자신의 강점과 회사 비전 연결",
   "questions": [
     "[필수] 자신에 대해 자유롭게 표현해주세요."
   ],
-  "source_count": 4,
+  "source_count": 5,
   "criteria_met": true,
   "stop_reason": "min_unique_domains",
   "stats": {
-    "sample_count": 4,
-    "total_chars": 5721,
+    "sample_count": 5,
+    "total_chars": 7975,
     "unique_domains": 3
   },
   "failure_reasons": [],
   "flow_guide": {
     "common_flow": [
-      "지원 동기와 관심 계기 제시",
-      "문제/목표 인식과 개인 역할 정의",
-      "행동/전략/협업 방식 서술",
-      "결과/성과와 배운 점 정리",
-      "회사/직무와의 연결 및 기여 계획"
+      "소개",
+      "동기 설명",
+      "문제 인식",
+      "행동 설명",
+      "성과 설명",
+      "회사와 연결"
     ],
     "section_roles": [
       {
-        "name": "동기",
-        "role": "지원 맥락과 관심 계기를 제시",
+        "name": "소개",
+        "role": "자기 소개",
         "position": "intro"
       },
       {
-        "name": "문제/목표",
-        "role": "해결하려는 과제와 기준을 정의",
+        "name": "동기 설명",
+        "role": "지망 이유 및 배경 설명",
+        "position": "intro"
+      },
+      {
+        "name": "문제 인식",
+        "role": "문제 상황 설명 및 필요성 인식",
         "position": "mid"
       },
       {
-        "name": "행동",
-        "role": "접근 방식, 역할, 협업을 설명",
+        "name": "행동 설명",
+        "role": "문제 해결을 위한 실행 및 경험",
         "position": "mid"
       },
       {
-        "name": "결과",
-        "role": "성과와 학습을 간결히 정리",
-        "position": "mid"
+        "name": "성과 설명",
+        "role": "결과 설명 및 교훈",
+        "position": "ending"
       },
       {
-        "name": "연결",
-        "role": "회사/직무와의 적합성 및 포부",
+        "name": "회사와 연결",
+        "role": "자신의 강점과 회사 비전 연결",
         "position": "ending"
       }
     ],
@@ -53,57 +59,14 @@
       6
     ],
     "tips": [
-      "경험·근거 중심으로 구체성을 확보",
-      "결과 뒤에 배운 점과 재현 가능성을 제시",
-      "직무 키워드를 마지막에 자연스럽게 연결"
+      "자신의 경험과 회사의 비전을 자연스럽게 연결시켜라.",
+      "소개와 결론 부분에서는 자신의 동기와 성과를 강조하라.",
+      "문제를 인식하고 해결 방법을 구체적으로 서술하라.",
+      "구체적인 경험과 결과를 기반으로 자신의 강점을 설명하라."
     ]
   },
-  "fallback_used": true,
-  "fallback_guide": {
-    "common_flow": [
-      "지원 동기와 관심 계기 제시",
-      "문제/목표 인식과 개인 역할 정의",
-      "행동/전략/협업 방식 서술",
-      "결과/성과와 배운 점 정리",
-      "회사/직무와의 연결 및 기여 계획"
-    ],
-    "section_roles": [
-      {
-        "name": "동기",
-        "role": "지원 맥락과 관심 계기를 제시",
-        "position": "intro"
-      },
-      {
-        "name": "문제/목표",
-        "role": "해결하려는 과제와 기준을 정의",
-        "position": "mid"
-      },
-      {
-        "name": "행동",
-        "role": "접근 방식, 역할, 협업을 설명",
-        "position": "mid"
-      },
-      {
-        "name": "결과",
-        "role": "성과와 학습을 간결히 정리",
-        "position": "mid"
-      },
-      {
-        "name": "연결",
-        "role": "회사/직무와의 적합성 및 포부",
-        "position": "ending"
-      }
-    ],
-    "paragraph_count_range": [
-      4,
-      6
-    ],
-    "tips": [
-      "경험·근거 중심으로 구체성을 확보",
-      "결과 뒤에 배운 점과 재현 가능성을 제시",
-      "직무 키워드를 마지막에 자연스럽게 연결"
-    ]
-  },
+  "fallback_used": false,
+  "fallback_guide": {},
   "search_log_path": "patterns/sources/search_log.json",
   "sources_path": "patterns/sources/sources.jsonl"
 }

@@ -146,29 +146,49 @@ def get_api_key(config: Dict) -> str:
 # ============================================================
 
 class ModelSelector:
-    """KB 빌드용 모델 선택"""
+    """KB 빌드용 모델 선택 (R3: config.yaml의 model_policy 지원)"""
     
     def __init__(self, config: Dict):
         models = config.get("models", {})
+        self.high_quality = models.get("high_quality", "gpt-4o")
         self.standard = models.get("standard", "gpt-4o")
         self.fast = models.get("fast", "gpt-4o-mini")
+        
+        # KB 모델 정책 (config에서 override 가능)
+        kb_policy = config.get("kb", {}).get("model_policy", {})
+        self.policy = {
+            "paper_analysis": kb_policy.get("paper_analysis", "high_quality"),
+            "key_extraction": kb_policy.get("key_extraction", "high_quality"),
+            "summary_generation": kb_policy.get("summary_generation", "high_quality"),
+            "meta_extraction": kb_policy.get("meta_extraction", "fast"),
+            "keyword_extraction": kb_policy.get("keyword_extraction", "fast"),
+        }
     
     def get_model(self, task: str) -> str:
-        """작업별 모델 반환"""
-        # gpt-4o: 논문 분석, 프로필 생성
-        standard_tasks = ["analyzer", "profile", "summary"]
-        
-        # gpt-4o-mini: 메타 추출, 키워드
-        fast_tasks = ["meta", "keyword", "extract"]
-        
+        """작업별 모델 반환 (R3 정책 적용)"""
         task_lower = task.lower()
         
-        if any(t in task_lower for t in standard_tasks):
-            return self.standard
-        elif any(t in task_lower for t in fast_tasks):
-            return self.fast
+        # 정책 기반 매핑
+        if "analysis" in task_lower or "analyzer" in task_lower:
+            tier = self.policy.get("paper_analysis", "high_quality")
+        elif "key" in task_lower and "extract" in task_lower:
+            tier = self.policy.get("key_extraction", "high_quality")
+        elif "summary" in task_lower or "profile" in task_lower:
+            tier = self.policy.get("summary_generation", "high_quality")
+        elif "meta" in task_lower:
+            tier = self.policy.get("meta_extraction", "fast")
+        elif "keyword" in task_lower:
+            tier = self.policy.get("keyword_extraction", "fast")
         else:
-            return self.fast  # KB 작업은 기본 fast
+            tier = "fast"  # KB 기본
+        
+        # tier -> 실제 모델
+        if tier == "high_quality":
+            return self.high_quality
+        elif tier == "standard":
+            return self.standard
+        else:
+            return self.fast
 
 
 # ============================================================

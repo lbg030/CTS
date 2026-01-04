@@ -34,7 +34,7 @@
         "네이버랩스 컴퓨터 비전 성장과정 자기소개서 합격"
       ],
       "raw_results": 48,
-      "saved_samples": 4,
+      "saved_samples": 5,
       "backend_counts": {
         "openai_web_search": 0,
         "duckduckgo": 48
@@ -49,10 +49,10 @@
     "min_unique_domains": 3
   },
   "stats": {
-    "sample_count": 4,
-    "total_chars": 5721,
+    "sample_count": 5,
+    "total_chars": 7975,
     "unique_domains": 3
   },
-  "collected_count": 20,
-  "cleaned_count": 4
+  "collected_count": 21,
+  "cleaned_count": 5
 }
