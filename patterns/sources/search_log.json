@@ -31,13 +31,30 @@
         "네이버랩스 컴퓨터 비전 강점 합격 자소서",
         "네이버랩스 컴퓨터 비전 가치관 합격 자소서",
         "네이버랩스 컴퓨터 비전 자기소개 자기소개서 합격",
-        "네이버랩스 컴퓨터 비전 성장과정 자기소개서 합격"
+        "네이버랩스 컴퓨터 비전 성장과정 자기소개서 합격",
+        "네이버랩스 컴퓨터 비전 강점 자기소개서 합격",
+        "네이버랩스 컴퓨터 비전 가치관 자기소개서 합격",
+        "네이버랩스 컴퓨터 비전 자기소개 서류 합격 자기소개서",
+        "네이버랩스 컴퓨터 비전 성장과정 서류 합격 자기소개서"
       ],
-      "raw_results": 48,
-      "saved_samples": 5,
+      "raw_results": 80,
+      "saved_samples": 3,
       "backend_counts": {
         "openai_web_search": 0,
-        "duckduckgo": 48
+        "duckduckgo": 80
+      }
+    },
+    {
+      "step": "B",
+      "name": "질문+직무",
+      "queries": [
+        "컴퓨터 비전 자기소개 합격 자소서"
+      ],
+      "raw_results": 8,
+      "saved_samples": 1,
+      "backend_counts": {
+        "openai_web_search": 0,
+        "duckduckgo": 8
       }
     }
   ],
@@ -49,10 +66,10 @@
     "min_unique_domains": 3
   },
   "stats": {
-    "sample_count": 5,
-    "total_chars": 7975,
+    "sample_count": 4,
+    "total_chars": 3755,
     "unique_domains": 3
   },
-  "collected_count": 21,
-  "cleaned_count": 5
+  "collected_count": 29,
+  "cleaned_count": 4
 }

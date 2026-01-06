@@ -1,68 +1,67 @@
 {
   "company": "NAVER LABS",
-  "role": "자신의 강점과 회사 비전 연결",
+  "role": "기술적 경험과 회사 연결",
   "questions": [
     "[필수] 자신에 대해 자유롭게 표현해주세요."
   ],
-  "source_count": 5,
+  "source_count": 4,
   "criteria_met": true,
   "stop_reason": "min_unique_domains",
   "stats": {
-    "sample_count": 5,
-    "total_chars": 7975,
+    "sample_count": 4,
+    "total_chars": 3755,
     "unique_domains": 3
   },
   "failure_reasons": [],
   "flow_guide": {
     "common_flow": [
-      "소개",
-      "동기 설명",
-      "문제 인식",
-      "행동 설명",
-      "성과 설명",
-      "회사와 연결"
+      "자기소개",
+      "지원 동기",
+      "관련 경험",
+      "문제 해결",
+      "성과 및 기여",
+      "기업 연결"
     ],
     "section_roles": [
       {
-        "name": "소개",
-        "role": "자기 소개",
+        "name": "자기소개",
+        "role": "자신의 배경과 성격을 설명",
         "position": "intro"
       },
       {
-        "name": "동기 설명",
-        "role": "지망 이유 및 배경 설명",
+        "name": "지원 동기",
+        "role": "회사 지원 이유와 관심 분야를 설명",
         "position": "intro"
       },
       {
-        "name": "문제 인식",
-        "role": "문제 상황 설명 및 필요성 인식",
+        "name": "관련 경험",
+        "role": "경험과 역량 강조",
         "position": "mid"
       },
       {
-        "name": "행동 설명",
-        "role": "문제 해결을 위한 실행 및 경험",
+        "name": "문제 해결",
+        "role": "문제 해결 과정과 능력 입증",
         "position": "mid"
       },
       {
-        "name": "성과 설명",
-        "role": "결과 설명 및 교훈",
-        "position": "ending"
+        "name": "성과",
+        "role": "성과와 배운 점 설명",
+        "position": "mid"
       },
       {
-        "name": "회사와 연결",
-        "role": "자신의 강점과 회사 비전 연결",
+        "name": "기업 연결",
+        "role": "기술적 경험과 회사 연결",
         "position": "ending"
       }
     ],
     "paragraph_count_range": [
-      4,
+      3,
       6
     ],
     "tips": [
-      "자신의 경험과 회사의 비전을 자연스럽게 연결시켜라.",
-      "소개와 결론 부분에서는 자신의 동기와 성과를 강조하라.",
-      "문제를 인식하고 해결 방법을 구체적으로 서술하라.",
-      "구체적인 경험과 결과를 기반으로 자신의 강점을 설명하라."
+      "지원 동기와 문제 해결 사례에 대한 강조가 중요함.",
+      "구조적 흐름은 명확한 논리적 전개를 포함해야 함.",
+      "회사와의 연결성을 자연스럽게 드러내야 함."
     ]
   },
   "fallback_used": false,

@@ -1,45 +1,45 @@
 {
   "company_name": "NAVER LABS",
   "role": "Generative Computer Vision Researcher",
-  "company_description": "선진 비전 기술로 디지털 세계와 현실을 연결",
-  "team_description": "공간 및 사물의 디지털트윈 데이터를 개발",
+  "company_description": "현실과 디지털 세계 연결",
+  "team_description": "독자적 솔루션 제공",
   "values": [
-    "협업",
-    "고객 중심",
+    "끈기",
     "혁신",
-    "지속 가능성"
+    "도전",
+    "협력"
   ],
   "talent_traits": [
-    "기본에 충실한 실행력",
-    "창의적 사고",
-    "문제 해결 능력",
-    "Self-motivated team player"
+    "실행력 있는",
+    "분석적인",
+    "창의적인",
+    "학습 열망"
   ],
   "required_qualifications": [
-    "박사 과정 대학원생",
-    "Computer vision 이해"
+    "관련 박사 과정",
+    "프로그래밍 숙련"
   ],
   "preferred_qualifications": [
-    "국제 학술대회 투고 경력",
-    "6개월 이상 프로젝트 경험"
+    "논문 투고 경험",
+    "프로젝트 참여 경험"
   ],
   "responsibilities": [
-    "체험형 인턴",
-    "연구 주제 수행"
+    "데이터 제작",
+    "인식 기술 개발"
   ],
   "keywords": [
-    "Computer vision",
-    "Deep learning"
+    "AI/ML",
+    "Computer Vision"
   ],
   "writing_tone": "명확하고 구체적인 근거 중심",
   "do_not_claim": [
     "근거 없는 수치",
     "과장된 표현"
   ],
-  "company_culture": "NAVER LABS는 개방적이고 혁신적인 문화를 중시하며, 직원들이 새로운 아이디어를 제안하고 실험하도록 장려합니다.",
-  "industry_focus": "NAVER LABS는 인공지능, 로보틱스, 자율 주행 및 스마트 기기 분야에 집중하여 연구와 개발을 진행하고 있습니다.",
+  "company_culture": "NAVER LABS는 기술과 경험의 경계를 허물며, 창의적인 아이디어를 바탕으로 새로운 기술 혁신을 추구하는 문화를 가지고 있습니다.",
+  "industry_focus": "NAVER LABS는 인공지능, 로봇 공학, 자율주행, 증강 현실 등의 첨단 기술 연구 및 개발에 주력하고 있습니다.",
   "_meta": {
-    "created_at": "2026-01-04T01:55:25.205933",
+    "created_at": "2026-01-05T13:02:06.187859",
     "source_urls": [
       "https://recruit.naverlabs.com/rcrt/view.do?annoId=30004340"
     ],

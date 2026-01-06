@@ -15,17 +15,17 @@
     "keywords": [
       "3D Gaussian Splatting",
       "SLAM",
-      "스테레오 깊이 추정",
-      "온라인 매핑",
-      "신경 렌더링"
+      "stereo depth estimation",
+      "online mapping",
+      "neural rendering"
     ],
     "key_contributions": [
-      "스테레오 깊이 추정을 통해 온라인 3DGS 재구성 방법을 제안",
-      "이중 필터링 메커니즘을 통한 깊이 추정 안정화 및 잡음 제거"
+      "스테레오 깊이 추정을 통해 온라인 3DGS 재구성 프레임워크 제안",
+      "두 단계 필터링 메커니즘을 통해 깊이 추정의 신뢰성 개선"
     ],
-    "problem_addressed": "기존의 3DGS 방법들의 실시간 적용 한계를 해결합니다.",
-    "proposed_method": "스테레오 기반의 깊이 추정과 온라인 3DGS 모형 구축 및 최적화 방법을 제안합니다.",
-    "results_summary": "Stereo-GS는 EuRoC에서 23.70 PSNR, TartanAir에서 22.47을 달성했습니다."
+    "problem_addressed": "오프라인 3DGS 방법의 비효율성과 스테레오 SLAM의 제한된 깊이 정밀성을 해결",
+    "proposed_method": "Stereo-GS는 rectified 스테레오 이미지 쌍에서 깊이 맵을 추정하여 3DGS 모델을 온라인으로 재구성합니다.",
+    "results_summary": "EuRoC에서 평균 PSNR 23.70, TartanAir에서 22.47을 달성하였으며, Artefacts를 최소화하며 기존 방법들보다 높은 시각적 품질을 보여줍니다."
   },
   {
     "paper_id": "07af93b9bae7",
@@ -38,19 +38,19 @@
     "citations": 0,
     "importance_score": 0.6,
     "keywords": [
+      "Monocular Depth",
       "Multi-View Stereo",
       "Depth Foundation Models",
-      "Monocular Depth Estimation",
       "3D Reconstruction",
-      "Attention-based Fusion"
+      "Bidirectional Refinement"
     ],
     "key_contributions": [
-      "DFM과 MVS를 결합한 양방향 상호 개선 메커니즘을 제안",
-      "주의 기반의 모노큘러 및 멀티뷰 코스트 볼륨 통합 방식을 통해 깊이 맵의 정밀도와 일반성을 향상"
+      "단일 카메라 우선순위를 통합한 새로운 MVS 프레임워크 제안",
+      "MVS 구조를 강화하기 위한 양방향 상호 개선 메커니즘 제안"
     ],
-    "problem_addressed": "MVS의 일반화 문제와 DFM의 스케일 모호성을 해결",
-    "proposed_method": "양방향 상호 개선 전략을 사용한 모노큘러 및 멀티뷰 깊이 통합",
-    "results_summary": "여러 벤치마크 데이터셋에서 높은 정확도 및 일반화 성능을 보입니다. 최신 MVS 방법보다 성능 우수."
+    "problem_addressed": "MVS 기법의 일반화 부족 문제 및 단일 카메라 깊이 예측의 스케일 모호성 문제",
+    "proposed_method": "양방향 상호 개선 전략을 적용하여 MVS와 DFMs의 결합을 강화",
+    "results_summary": "벤치마크에서 높은 정확도와 일반화를 보였으며, 특별히 가려진 영역과 제한된 시야 중첩이 있는 경우에서도 완전한 깊이 맵을 생성"
   },
   {
     "paper_id": "9eac4875c0cd",
@@ -64,49 +64,50 @@
     "year": 2024,
     "venue": "학회/저널명",
     "citations": 0,
-    "importance_score": 0.2,
+    "importance_score": 0.30000000000000004,
     "keywords": [
       "3D Gaussian Splatting",
-      "Online 3D Modeling",
-      "Dense SLAM",
-      "Novel View Selection"
+      "Novel View Selection",
+      "Real-time 3D Reconstruction"
     ],
     "key_contributions": [
-      "비키프레임을 사용한 새로운 관점 선택 접근 방식을 통해 모델 완전성을 크게 향상시킵니다.",
-      "Gaussian의 불확실성을 형태와 위치 기울기로 정의하여 효과적인 관점 선택이 가능합니다."
+      "노벨 뷰 선택 방식 도입",
+      "실시간 3D 재구성 향상"
     ],
-    "problem_addressed": "키프레임에 의존한 불완전한 3DGS 재구성 문제를 해결합니다.",
-    "proposed_method": "비키프레임의 새로운 관점 선택을 통해 3DGS 모델의 완전성을 향상시킵니다.",
-    "results_summary": "복잡한 야외 환경에서 최첨단 방법들을 능가하는 뛰어난 렌더링 정확도를 달성했습니다."
+    "problem_addressed": "기존 3D 재구성의 불완전성과 실시간 처리 문제",
+    "proposed_method": "노벨 뷰 선택(NVS)을 통한 3D Gaussian Splatting 최적화",
+    "results_summary": "PSNR 11.6% 향상, KAIST 드론 데이터 세트에서 우수한 품질의 3D 재구성 달성"
   },
   {
     "paper_id": "c61cbd659b1d",
     "title": "MVS-GS: High-Quality 3D Gaussian Splatting Mapping via Online Multi-View Stereo",
     "authors": [
       "Byeonggwon Lee",
-      "Junkyu Park",
+      "Junky Park",
       "Khang Truong Giang",
       "Sungho Jo",
       "Soohwan Song"
     ],
     "year": 2025,
-    "venue": "학술지",
+    "venue": "학회/저널명",
     "citations": 0,
     "importance_score": 0.35,
     "keywords": [
+      "온라인 다중-뷰 스테레오",
       "3D Gaussian Splatting",
-      "Multi-View Stereo",
-      "SLAM",
-      "Depth Estimation",
-      "Uncertainty-aware Novel View Selection",
-      "Stereo Depth Estimation"
+      "신경 렌더링",
+      "Dense SLAM",
+      "3D 모델링",
+      "깊이 추정"
     ],
     "key_contributions": [
-      "온라인 MVS와 3DGS 연계하여 기하학적 정확성을 높인 새로운 파이프라인 제안",
-      "Gaussian Uncertainty 기반의 능동적 프레임 선별 전략(NVS) 제안 및 실제 하드웨어와의 적합성을 위한 시스템 엔지니어링 고려"
+      "온라인 MVS 기술을 활용한 고품질 3DGS 매핑 프레임워크 제안",
+      "시퀀스 프레임에서의 포괄적 깊이 필터링을 통합한 온라인 MVS 방법 소개",
+      "병렬 프레임워크를 통해 3DGS 모델 최적화 효율성 증가 및 새로운 영역에 대한 초기화 간소화",
+      "실내 장면뿐만 아니라 실외 장면에서도 테스트를 통해 일반화 능력을 입증"
     ],
-    "problem_addressed": "Sparse Depth 의존, Keyframe 의존, 단안 방식의 기하학적 문제 해결",
-    "proposed_method": "SLAM 기반 DROID-SLAM과 Local Window 프레임을 활용한 온라인 MVS Depth Guidance 및 Uncertainty-aware NVS, Stereo Depth Estimation 집합",
-    "results_summary": "PSNR 기준 11.6% 향상 및 KAIST 드론 데이터에서의 구조적 일관성 있는 재구성 결과. 다양한 벤치마크에서 Geometric Accuracy 성능 입증"
+    "problem_addressed": "RGB 이미지 기반의 저해상도 및 불확실한 깊이 추정 문제 해결",
+    "proposed_method": "온라인 다중-뷰 스테레오 방식을 활용한 3D Gaussian Splatting 모델링",
+    "results_summary": "실내 장면에서는 평균 PSNR 약 2 dB 향상, 실외 장면에서는 약 10.28 dB 향상"
   }
 ]

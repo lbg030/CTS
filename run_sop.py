@@ -29,7 +29,7 @@ from datetime import datetime
 from typing import List, Dict, Any, Optional, Tuple
 from collections import Counter
 from enum import Enum
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, field
 
 import yaml
 from openai import OpenAI
@@ -219,12 +219,18 @@ class FirstPersonRemover:
 
 @dataclass
 class ScoreResult:
-    """스코어링 결과"""
+    """스코어링 결과
+
+    rationales: 각 평가 모듈별 상세 근거
+                QualityScorer.score()에서 항상 제공되어야 함
+                Phase 2/3 refinement에서 사용
+    """
     total_score: float
     criteria_scores: Dict[str, float]
     passed: bool
     failed_criteria: List[str]
     recommendations: List[str]
+    rationales: Dict[str, str] = field(default_factory=dict)
 
 
 class QualityScorer:
@@ -302,6 +308,12 @@ class QualityScorer:
         fp_report = self.first_person_remover.get_violation_report(body)
         if not fp_report.get("passed", True):
             violations.add("first_person")
+
+        # 영어 문장 체크 (기술 용어는 제외)
+        # 3단어 이상의 연속된 영어 단어는 영어 문장으로 간주
+        if re.search(r'\b[A-Za-z]+\s+[A-Za-z]+\s+[A-Za-z]+\b', body):
+            violations.add("english_sentence")
+
         return sorted(violations)
     
     def _score_length(self, body: str) -> float:
@@ -407,13 +419,14 @@ class QualityScorer:
         
         # 개선 권고
         recommendations = self._generate_recommendations(scores, failed, rationales)
-        
+
         return ScoreResult(
             total_score=round(final_score, 2),
             criteria_scores=scores,
             passed=passed,
             failed_criteria=failed,
-            recommendations=recommendations
+            recommendations=recommendations,
+            rationales=rationales  # Phase 2/3에서 사용
         )
     
     def _generate_recommendations(self, scores: Dict, failed: List[str], rationales: Dict[str, str]) -> List[str]:
@@ -929,12 +942,13 @@ class ModelSelector:
         self.fallback_on_error = self.gpt5_compat.get("fallback_on_error", True)
     
     def get_model(self, task: str) -> str:
-        high_quality_tasks = ["integrator", "writer", "cts_scorer", "scorer", "refiner"]
-        standard_tasks = ["planner", "reviewer"]
+        high_quality_tasks = ["integrator", "writer", "cts_scorer", "scorer", "refiner",
+                             "refine_execution", "refine_polish"]
+        standard_tasks = ["planner", "reviewer", "refine_diagnostic", "refine_planning"]
         fast_tasks = ["length_fixer"]
-        
+
         task_lower = task.lower()
-        
+
         if any(t in task_lower for t in high_quality_tasks):
             return self.high_quality
         elif any(t in task_lower for t in standard_tasks):
@@ -1219,7 +1233,16 @@ def build_prompts(company_name: str, workflow_guide: str, qtype: QuestionType) -
 9. **1인칭 주어 완전 제거**
 10. 메타 발언 금지: "예시/가이드/설명입니다/아래는" 등 금지
 11. 질문과 직접 무관한 일반론 금지
+12. **한글 중심 작성** (기술 용어 외 영어 사용 금지)
 {first_person_rule}
+
+## ⚠️ 한글 위주 작성 규칙 (매우 중요)
+- 본문은 한글을 중심으로 작성하세요
+- 영어 문장, 영어로만 된 긴 설명은 절대 금지
+- **기술 용어는 영어 사용 허용** (예: SLAM, 3D reconstruction, depth estimation)
+- 일반 명사는 한글 사용 필수
+  ✗ 나쁜 예: "I worked on the project", "The system is good"
+  ✓ 좋은 예: "SLAM 기반 3D reconstruction 프로젝트에서 depth estimation 알고리즘을 개선했습니다"
 
 ## 출력 형식 (고정)
 {output_format}
@@ -1368,19 +1391,28 @@ def build_prompts(company_name: str, workflow_guide: str, qtype: QuestionType) -
 }}""",
 
         "length_fixer": common + """
-역할: Length Fixer
+역할: Length Fixer (Phase 1 초안 분량 확보)
+
+**Phase 1의 핵심 목표: 최종 제출 분량(950~1000자)에 가까운 초안을 생성**
 
 규칙:
-- 목표 글자수 맞추기 (한 번에 목표치 근접)
+- **목표 글자수에 적극적으로 도달** (950자 이상 필수)
+- 분량 확보 방법:
+  * 기존 내용을 구체적으로 확장 (추상적 표현 → 구체적 사례로)
+  * KB 근거를 활용하여 경험을 상세히 서술
+  * 논리적 연결 문장 추가 (원인-행동-결과 연결)
+  * 불필요한 반복은 피하되, 필요한 상세 설명은 추가
 - 제출용 본문 형식 유지 (소제목/번호/STAR/불릿/메타 문구 금지)
 - 존댓말 유지
 - 수치/지표 없으면 [내용 보강 필요] 유지
 - **1인칭 표현 추가 금지**
 
+⚠️ 중요: Phase 1에서 분량을 확보하지 못하면, Phase 2 이후에는 글자 수를 늘릴 수 없습니다!
+
 출력 JSON:
 {{
-    "reasoning_summary": "조정 내용",
-    "final_text": "조정된 텍스트 (제출용 본문, 1인칭 없이)",
+    "reasoning_summary": "조정 내용 (어떻게 분량을 확보했는지)",
+    "final_text": "조정된 텍스트 (제출용 본문, 1인칭 없이, 950자 이상)",
     "char_count": 980
 }}""",
     }
@@ -1424,7 +1456,8 @@ def write_markdown(
     refine_iterations: Optional[List[RefineIteration]] = None,
     versions: Optional[List[Dict[str, Any]]] = None,
     submission_text: Optional[str] = None,
-    submission_path: Optional[str] = None
+    submission_path: Optional[str] = None,
+    cfg: Optional[Dict] = None
 ) -> None:
     ensure_dir(out_path)
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -1444,20 +1477,39 @@ def write_markdown(
 
     # R2: 스코어 리포트
     if score_result:
+        scoring_cfg = cfg.get("scoring", {}) if cfg else {}
+        pass_threshold = scoring_cfg.get("pass_threshold", 9.5)
+        gap = max(0, pass_threshold - score_result.total_score)
+
         md.append("\n---\n\n## 📊 품질 스코어\n\n")
-        md.append(f"- **총점**: {score_result.total_score}/10.0\n")
-        md.append(f"- **통과**: {'✅ 예' if score_result.passed else '❌ 아니오'}\n")
-        
+        md.append(f"- **총점**: {score_result.total_score:.2f}/10.0\n")
+        md.append(f"- **목표**: {pass_threshold:.1f}/10.0\n")
+
+        if score_result.passed:
+            md.append(f"- **상태**: ✅ 통과\n")
+        else:
+            md.append(f"- **상태**: ⚠️ 미달 (갭: -{gap:.2f}점)\n")
+
         if score_result.criteria_scores:
-            md.append("\n| 항목 | 점수 |\n|------|------|\n")
+            md.append("\n| 항목 | 점수 | 상태 |\n|------|------|------|\n")
             for name, score in score_result.criteria_scores.items():
                 if name != "rationale":
-                    md.append(f"| {name} | {score} |\n")
-        
+                    module_cfg = scoring_cfg.get("modules", {}).get(name, {})
+                    min_score = module_cfg.get("min_score", 9.0)
+                    status = "✅" if score >= min_score else "❌"
+                    md.append(f"| {name} | {score:.2f} | {status} |\n")
+
         if score_result.failed_criteria:
             md.append(f"\n**미달 항목**: {', '.join(score_result.failed_criteria)}\n")
-        
-        if score_result.recommendations:
+
+        # ✅ 9.5 미달 시: 개선 가이드 추가
+        if not score_result.passed and score_result.recommendations:
+            md.append("\n### ⚠️ 품질 개선 가이드\n\n")
+            md.append(f"현재 점수가 목표({pass_threshold:.1f})에 **{gap:.2f}점** 미달합니다.\n\n")
+            md.append("#### 개선 권고 사항 (우선순위순)\n\n")
+            for i, rec in enumerate(score_result.recommendations[:5], 1):
+                md.append(f"{i}. **권고**: {rec}\n")
+        elif score_result.recommendations:
             md.append("\n**개선 권고**:\n")
             for rec in score_result.recommendations:
                 md.append(f"- {rec}\n")
@@ -1473,39 +1525,39 @@ def write_markdown(
         for r in weak_reasons:
             md.append(f"- {r}\n")
 
-    allow_body_output = True
-    if score_result and not score_result.passed:
-        allow_body_output = False
-        md.append("\n---\n\n## 제출용 본문\n\n")
-        md.append("품질 기준 미달로 본문을 출력하지 않습니다.\n")
+    # ✅ 본문은 항상 출력 (9.5 미만이어도 출력)
+    md.append("\n---\n\n## 📝 제출용 본문\n\n")
 
-    if allow_body_output and submission_text:
-        md.append("\n---\n\n## 제출용 본문\n\n")
+    # 품질 미달 시 경고 메시지 추가
+    if score_result and not score_result.passed:
+        md.append("> ⚠️ **주의**: 이 본문은 현재 품질 기준(9.5/10)에 미달합니다.\n")
+        md.append("> 위 개선 권고 사항을 참고하여 수정 후 제출하시기 바랍니다.\n\n")
+
+    if submission_text:
         md.append(submission_text.strip() + "\n")
+    else:
+        md.append(final_text.strip() + "\n")
 
     md.append("\n---\n\n## 자기소개서 본문 (버전별)\n\n")
-    if allow_body_output:
-        if versions:
-            for v in versions:
-                v_idx = v.get("version", 1)
-                v_text = strip_self_scoring(str(v.get("text", "")))
-                v_score = v.get("score")
-                v_recs = []
-                if isinstance(v_score, ScoreResult):
-                    v_recs = v_score.recommendations or []
-                md.append(f"[버전 {v_idx}]\n\n")
-                md.append(v_text.strip() + "\n\n")
-                if isinstance(v_score, ScoreResult):
-                    md.append("[Self-Scoring]\n")
-                    md.append(f"* total: {v_score.total_score:.2f} / 10\n")
-                    recs = v_recs[:3] if v_recs else ["없음"]
-                    for r in recs:
-                        md.append(f"* 개선 포인트: {r}\n")
-                    md.append("\n")
-        else:
-            md.append(final_text.strip() + "\n")
+    if versions:
+        for v in versions:
+            v_idx = v.get("version", 1)
+            v_text = strip_self_scoring(str(v.get("text", "")))
+            v_score = v.get("score")
+            v_recs = []
+            if isinstance(v_score, ScoreResult):
+                v_recs = v_score.recommendations or []
+            md.append(f"[버전 {v_idx}]\n\n")
+            md.append(v_text.strip() + "\n\n")
+            if isinstance(v_score, ScoreResult):
+                md.append("[Self-Scoring]\n")
+                md.append(f"* total: {v_score.total_score:.2f} / 10\n")
+                recs = v_recs[:3] if v_recs else ["없음"]
+                for r in recs:
+                    md.append(f"* 개선 포인트: {r}\n")
+                md.append("\n")
     else:
-        md.append("품질 기준 미달로 본문을 출력하지 않습니다.\n")
+        md.append(final_text.strip() + "\n")
 
     md.append("\n---\n\n## 사용 근거\n\n")
     for h in evidence_top[:3]:
@@ -1515,9 +1567,13 @@ def write_markdown(
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("".join(md))
 
-    if submission_path and submission_text and allow_body_output:
+    # ✅ 본문 파일도 항상 생성 (9.5 미만이어도 생성)
+    if submission_path and submission_text:
         ensure_dir(submission_path)
         with open(submission_path, "w", encoding="utf-8") as f:
+            # 품질 미달 시 파일 상단에 경고 추가
+            if score_result and not score_result.passed:
+                f.write("<!-- ⚠️ 경고: 이 본문은 품질 기준(9.5/10) 미달. 개선 후 제출 필요 -->\n\n")
             f.write(submission_text.strip() + "\n")
 
 
@@ -1563,7 +1619,15 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
 
     out_cfg = cfg.get("output", {})
     out_template = out_cfg.get("template", "outputs/{company_slug}_{timestamp}_q{q_idx}_{question_slug}.md")
-    out_md = render_output_path(out_template, company_name, q_idx, question)
+
+    # timestamp를 함수 스코프에서 유지 (나중에 report 저장 시 사용)
+    timestamp = now_ts()
+    out_md = out_template.format(
+        company_slug=slugify(company_name),
+        timestamp=timestamp,
+        q_idx=q_idx,
+        question_slug=question_slug(question),
+    )
 
     models_used = {}
 
@@ -1664,6 +1728,7 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
             evidence_top=hits[:3], company_profile_path=company_profile_path,
             kb_dir=kb_dir, weak_evidence=weak, weak_reasons=reasons,
             score_result=None, refine_iterations=None,
+            cfg=cfg
         )
         return True
 
@@ -1779,13 +1844,19 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
         if target_min <= count <= target_max:
             break
         delta = target_len - count
+
+        # Phase 1의 목표: 최소 950자 이상 확보
+        # 950자 미만이면 반복 계속
+        must_continue = count < target_min
+
         with StepTimer(logger, f"[Q{q_idx}] Length Fixer {i+1}/{max_fix_iters} [{fixer_model}]"):
             fixer = call_agent_json(client, fixer_model, prompts["length_fixer"],
                 {"final_text": final_text, "target_min": target_min, "target_max": target_max,
-                 "instruction": f"현재 {count}자 → 목표 {target_len}자, 변화량 {delta:+d}자 (한 번에 맞추기). "
+                 "instruction": f"현재 {count}자 → 목표 {target_len}자, 변화량 {delta:+d}자 (반드시 950자 이상 달성). "
+                                f"⚠️ Phase 1에서 분량을 확보하지 못하면 Phase 2 이후에는 늘릴 수 없습니다! "
                                 f"{integrator.get('length_fix_instruction', '')}",
                  "constraints": constraints},
-                max_tokens.get("length_fixer", 900), retry_cfg, logger, "LengthFixer", model_selector)
+                max_tokens.get("length_fixer", 1200), retry_cfg, logger, "LengthFixer", model_selector)
             if abort_if_error(fixer, "LengthFixer"):
                 return
             final_text = strip_self_scoring((fixer.get("final_text") or "").strip())
@@ -1795,11 +1866,17 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
             count = char_len(final_text)
             logger.info("[Q%d] → %d자", q_idx, count)
             new_delta = target_len - count
-            if prev_delta is not None:
+
+            # 조기 종료 조건: 950자 미만이면 계속 진행
+            if prev_delta is not None and not must_continue:
                 improved = abs(prev_delta) - abs(new_delta)
                 if improved < max(20, abs(prev_delta) * 0.2):
-                    logger.warning("[Q%d] 길이 조정 개선 폭이 작아 반복 중단", q_idx)
-                    break
+                    if count >= target_min:
+                        logger.info("[Q%d] 목표 분량 달성 (%d자), 반복 종료", q_idx, count)
+                        break
+                    else:
+                        logger.warning("[Q%d] 개선 폭은 작지만 분량 부족(%d자 < %d자), 계속 진행",
+                                      q_idx, count, target_min)
             prev_delta = new_delta
 
     if not final_text:
@@ -1829,22 +1906,69 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
 
         versions = [{"version": 1, "text": initial_text, "score": score_result}]
 
-        # R2: Refine 루프
-        refine_cfg = cfg.get("refine_loop", {})
-        if refine_cfg.get("enabled", False) and not score_result.passed:
-            with StepTimer(logger, f"[Q{q_idx}] Refine 루프"):
-                refine_loop = RefineLoop(client, cfg, logger, scorer, model_selector)
-                final_text, score_result, refine_iterations = refine_loop.refine(
-                    initial_text, score_result, question, company_profile, evidence, qtype, constraints
+        # Phase 2/3 Refinement Pipeline (NEW)
+        all_iterations = []
+        phase2_enabled = cfg.get("phase2", {}).get("enabled", False)
+        phase3_enabled = cfg.get("phase3", {}).get("enabled", False)
+
+        # Phase 2: Structural Quality Improvement (9.0-9.2)
+        if phase2_enabled and score_result.total_score < cfg.get("phase2", {}).get("target_score", 9.0):
+            with StepTimer(logger, f"[Q{q_idx}] Phase 2: Structural Quality Improvement"):
+                from phase2_refiner import Phase2StructuralRefiner
+                phase2_refiner = Phase2StructuralRefiner(
+                    client, cfg, logger, scorer, kb_searcher, model_selector
+                )
+                final_text, score_result, phase2_iterations = phase2_refiner.refine(
+                    initial_text, score_result, question, qtype,
+                    company_profile, evidence, constraints
                 )
                 count = char_len(final_text)
-                models_used["Refiner"] = model_selector.get_model("refiner")
-                if refine_iterations:
-                    for idx, it in enumerate(refine_iterations, 2):
-                        v_score = scorer.score(it.text_after, question, company_profile, evidence, qtype)
-                        versions.append({"version": idx, "text": it.text_after, "score": v_score})
-                    score_result = versions[-1]["score"]
-                submission_text = normalize_submission_text(strip_self_scoring(final_text))
+                all_iterations.extend(phase2_iterations)
+                logger.info("[Q%d] Phase 2 완료: %.2f → %.2f (%d회 반복)",
+                           q_idx, initial_text and versions[0]["score"].total_score,
+                           score_result.total_score, len(phase2_iterations))
+
+                # Track versions
+                for idx, it in enumerate(phase2_iterations, len(versions) + 1):
+                    versions.append({
+                        "version": idx,
+                        "text": it.text_after,
+                        "score": scorer.score(it.text_after, question, company_profile, evidence, qtype),
+                        "phase": "phase2"
+                    })
+
+        # Phase 3: Final Convergence (9.5+)
+        if phase3_enabled and score_result.total_score < cfg.get("phase3", {}).get("target_score", 9.5):
+            phase2_baseline = score_result.total_score
+            with StepTimer(logger, f"[Q{q_idx}] Phase 3: Final Convergence"):
+                from phase3_polisher import Phase3FinalPolisher
+                phase3_polisher = Phase3FinalPolisher(
+                    client, cfg, logger, scorer, model_selector
+                )
+                final_text, score_result, phase3_iterations = phase3_polisher.refine(
+                    final_text, score_result, question, company_profile,
+                    evidence, qtype, constraints, phase2_baseline
+                )
+                count = char_len(final_text)
+                all_iterations.extend(phase3_iterations)
+                logger.info("[Q%d] Phase 3 완료: %.2f → %.2f (%d회 반복)",
+                           q_idx, phase2_baseline, score_result.total_score, len(phase3_iterations))
+
+                # Track versions
+                for idx, it in enumerate(phase3_iterations, len(versions) + 1):
+                    versions.append({
+                        "version": idx,
+                        "text": it.text_after,
+                        "score": scorer.score(it.text_after, question, company_profile, evidence, qtype),
+                        "phase": "phase3"
+                    })
+
+        # Update refine_iterations for backward compatibility
+        refine_iterations = all_iterations if all_iterations else None
+        if refine_iterations:
+            models_used["Phase2_Refiner"] = model_selector.get_model("refine_execution")
+            models_used["Phase3_Polisher"] = model_selector.get_model("refine_polish")
+            submission_text = normalize_submission_text(strip_self_scoring(final_text))
 
     # 저장
     with StepTimer(logger, f"[Q{q_idx}] MD 저장"):
@@ -1856,25 +1980,67 @@ def run_for_question(cfg: Dict, logger: logging.Logger, question: str, q_idx: in
             kb_dir=kb_dir, weak_evidence=weak, weak_reasons=reasons,
             score_result=score_result, refine_iterations=refine_iterations,
             versions=versions, submission_text=submission_text,
-            submission_path=os.path.splitext(out_md)[0] + "_submission.txt"
+            submission_path=os.path.splitext(out_md)[0] + "_submission.txt",
+            cfg=cfg
         )
 
     logger.info("[Q%d] ✅ 완료: %s", q_idx, out_md)
 
-    # R2: Refine 리포트 저장
-    if refine_iterations and cfg.get("refine_loop", {}).get("save_iteration_history", False):
-        report_path = cfg.get("refine_loop", {}).get("report_path", "outputs/refine_report.json")
+    # Phase 2/3 리포트 저장
+    if refine_iterations:
+        # Save detailed phase report
+        report_path = f"outputs/phase_report_q{q_idx}_{timestamp}.json"
         ensure_dir(report_path)
+
+        # Separate iterations by phase
+        phase2_iters = [it for it in refine_iterations if hasattr(it, 'diagnostics') and 'diagnostic' in it.diagnostics]
+        phase3_iters = [it for it in refine_iterations if it not in phase2_iters]
+
+        # Helper function to convert Enum to string in nested structures
+        def serialize_for_json(obj):
+            """Recursively convert Enum objects to their values for JSON serialization"""
+            if isinstance(obj, Enum):
+                return obj.value
+            elif isinstance(obj, dict):
+                return {k: serialize_for_json(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [serialize_for_json(item) for item in obj]
+            elif hasattr(obj, '__dict__'):
+                return serialize_for_json(asdict(obj) if hasattr(obj, '__dataclass_fields__') else obj.__dict__)
+            else:
+                return obj
+
         report = {
             "question": question,
+            "initial_score": versions[0]["score"].total_score if versions else None,
             "final_score": score_result.total_score if score_result else None,
-            "iterations": [asdict(it) for it in refine_iterations]
+            "total_improvement": (score_result.total_score - versions[0]["score"].total_score) if score_result and versions else 0,
+            "phase2": {
+                "enabled": phase2_enabled,
+                "iterations": len(phase2_iters),
+                "improvement": (phase2_iters[-1].score_after - phase2_iters[0].score_before) if phase2_iters else 0,
+                "details": [serialize_for_json(asdict(it)) for it in phase2_iters]
+            },
+            "phase3": {
+                "enabled": phase3_enabled,
+                "iterations": len(phase3_iters),
+                "improvement": (phase3_iters[-1].score_after - phase3_iters[0].score_before) if phase3_iters else 0,
+                "details": [serialize_for_json(asdict(it)) for it in phase3_iters]
+            },
+            "versions": len(versions)
         }
+
         with open(report_path, "w", encoding="utf-8") as f:
             json.dump(report, f, ensure_ascii=False, indent=2)
 
-    if cfg.get("output", {}).get("print_final_to_terminal", False) and (not score_result or score_result.passed):
+        logger.info("[Q%d] Phase 리포트 저장: %s", q_idx, report_path)
+
+    # ✅ 터미널 출력도 항상 가능 (단, 미달 시 경고 표시)
+    if cfg.get("output", {}).get("print_final_to_terminal", False):
         print("\n" + "=" * 60)
+        if score_result and not score_result.passed:
+            print(f"⚠️ 경고: 품질 기준(9.5/10) 미달 (현재: {score_result.total_score:.2f})")
+            print("=" * 60)
         print(final_text)
         print("=" * 60)
 
@@ -1901,18 +2067,24 @@ def main():
                 models.get("standard", "gpt-4o"),
                 models.get("fast", "gpt-4o-mini"))
 
-    # R1, R2 설정 로그
+    # R1, R2, Phase 2/3 설정 로그
     style_rules = cfg.get("style_rules", {})
     scoring = cfg.get("scoring", {})
-    refine = cfg.get("refine_loop", {})
-    
+    phase2 = cfg.get("phase2", {})
+    phase3 = cfg.get("phase3", {})
+
     logger.info("R1 1인칭 금지: %s", style_rules.get("forbidden_first_person", [])[:3])
-    logger.info("R2 스코어링: %s (임계값: %.1f)", 
+    logger.info("R2 스코어링: %s (임계값: %.1f)",
                 "활성화" if scoring.get("enabled") else "비활성화",
                 scoring.get("pass_threshold", 7.0))
-    logger.info("R2 Refine: %s (최대 %d회)",
-                "활성화" if refine.get("enabled") else "비활성화",
-                refine.get("max_iterations", 3))
+    logger.info("Phase 2 (구조 개선): %s (목표: %.1f, 최대 %d회)",
+                "활성화" if phase2.get("enabled") else "비활성화",
+                phase2.get("target_score", 9.0),
+                phase2.get("max_iterations", 8))
+    logger.info("Phase 3 (최종 다듬기): %s (목표: %.1f, 최대 %d회)",
+                "활성화" if phase3.get("enabled") else "비활성화",
+                phase3.get("target_score", 9.5),
+                phase3.get("max_iterations", 5))
 
     app = cfg.get("application", {})
     questions = app.get("questions", None)
